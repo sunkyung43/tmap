@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="systemInfoSqlMap">
+	<!-- 서버기기 정보 resultMap -->
+	<resultMap id="systemInfoMap" type="systemInfoVO">
+		<result property="rownum" column="ROWNUM" javaType="java.lang.String" />
+		<result property="systemId" column="system_id" javaType="java.lang.String" />
+		<result property="systemName" column="system_name" javaType="java.lang.String" />
+		<result property="systemNum" column="system_num" javaType="java.lang.String" />
+		<result property="systemState" column="system_state" javaType="java.lang.String" />
+		<result property="systemSdate" column="system_sdate" javaType="java.lang.String" />
+		<result property="systemIpOut" column="system_ip_out" javaType="java.lang.String" />
+		<result property="systemPortOut" column="system_port_out"
+			javaType="java.lang.String" />
+		<result property="systemIpIn" column="system_ip_in" javaType="java.lang.String" />
+		<result property="systemPortIn" column="system_port_in"
+			javaType="java.lang.String" />
+		<result property="systemCpuCount" column="system_cpu_count"
+			javaType="java.lang.String" />
+		<result property="systemMemory" column="system_memory"
+			javaType="java.lang.String" />
+		<result property="etc" column="etc" javaType="java.lang.String" />
+		<result property="serverTypeCode" column="server_type_code"
+			javaType="java.lang.String" />
+		<result property="serverTypeName" column="server_type_name"
+			javaType="java.lang.String" />
+	</resultMap>
+	<resultMap id="comCodeMap" type="com.tmap.servermanagement.vo.ComCodeInfoVO">
+		<result property="rownum" column="ROWNUM" javaType="java.lang.String" />
+		<result property="codeId" column="code_id" javaType="java.lang.String" />
+		<result property="code" column="code" javaType="java.lang.String" />
+		<result property="codeUpcode" column="code_upcode" javaType="java.lang.String" />
+		<result property="codeLevel" column="code_level" javaType="java.lang.String" />
+		<result property="codeName" column="code_name" javaType="java.lang.String" />
+		<result property="codeContent" column="code_content" javaType="java.lang.String" />
+		<result property="codeState" column="code_state" javaType="java.lang.String" />
+		<result property="codeSdate" column="code_sdate" javaType="java.lang.String" />
+	</resultMap>
+	<!-- 서버기기 리스트 수 -->
+	<select id="countSystemInfoList" parameterType="String"
+		resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(*)
+    FROM system_info SI, (select @RNUM:=0)R
+    WHERE SI.system_name LIKE CONCAT('%',#{systemName},'%')
+    AND SI.system_state <> 'D'
+	]]>
+	</select>
+	<!-- 서버기기 리스트 수 -->
+	<!-- <select id="countSystemInfoList" parameterType="String" resultType="java.lang.Integer"> -->
+	<!-- <![CDATA[ -->
+	<!-- SELECT COUNT(*) -->
+	<!-- FROM system_info SI, server_type_info ST, (select @RNUM:=0)R -->
+	<!-- WHERE SI.server_type_code = ST.server_type_code -->
+	<!-- AND SI.system_name LIKE CONCAT('%',#{systemName},'%') -->
+	<!-- AND SI.system_state <> 'D' -->
+	<!-- ]]> -->
+	<!-- </select> -->
+	<!-- 서버기기 리스트 -->
+	<select id="systemInfoList" parameterType="systemInfoVO"
+		resultMap="systemInfoMap">
+	<![CDATA[ 
+    SELECT @RNUM := @RNUM + 1 AS rownum, 
+	       SI.system_id,
+	       SI.system_name,
+	       SI.system_num,
+	       SI.system_state,
+	       DATE_FORMAT(SI.system_sdate, '%Y-%m-%d') AS system_sdate,
+	       SI.system_ip_out,
+	       SI.system_port_out,
+	       SI.system_ip_in,
+	       SI.system_port_in,
+	       SI.system_cpu_count,
+	       SI.system_memory,
+	       SI.etc,
+	       SI.server_type_code,
+           CCI.code_name AS serverTypeName
+	FROM system_info SI, comcode_info CCI, (select @RNUM:=0)R
+	WHERE SI.system_name LIKE CONCAT('%',#{systemName},'%')
+    AND CCI.code_upcode = "SYSTEM"
+    AND CCI.code = SI.server_type_code
+    AND SI.system_state <> 'D'
+	ORDER BY SI.system_sdate DESC
+ 	]]>
+	</select>
+	<!-- 서버기기 리스트 -->
+	<!-- <select id="systemInfoList" parameterType="systemInfoVO" resultMap="systemInfoMap"> -->
+	<!-- <![CDATA[ -->
+	<!-- SELECT @RNUM := @RNUM + 1 AS rownum, -->
+	<!-- SI.system_id, -->
+	<!-- SI.system_name, -->
+	<!-- SI.system_num, -->
+	<!-- SI.system_state, -->
+	<!-- DATE_FORMAT(SI.system_sdate, '%Y-%m-%d') AS system_sdate, -->
+	<!-- SI.system_ip_out, -->
+	<!-- SI.system_port_out, -->
+	<!-- SI.system_ip_in, -->
+	<!-- SI.system_port_in, -->
+	<!-- SI.system_cpu_count, -->
+	<!-- SI.system_memory, -->
+	<!-- SI.etc, -->
+	<!-- ST.server_type_name -->
+	<!-- FROM system_info SI, server_type_info ST, (select @RNUM:=0)R -->
+	<!-- WHERE SI.server_type_code = ST.server_type_code -->
+	<!-- AND SI.system_name LIKE CONCAT('%',#{systemName},'%') -->
+	<!-- AND SI.system_state <> 'D' -->
+	<!-- ORDER BY SI.system_sdate DESC -->
+	<!-- ]]> -->
+	<!-- </select> -->
+	<!-- 서버구분 리스트 -->
+	<!-- <select id="serverType" resultMap="systemInfoMap"> -->
+	<!-- SELECT server_type_name, -->
+	<!-- server_type_id, -->
+	<!-- server_type_code -->
+	<!-- FROM server_type_info -->
+	<!-- WHERE server_type_state = 'Y' -->
+	<!-- </select> -->
+	<!-- 서버구분 리스트 -->
+	<select id="srvType" resultMap="comCodeMap"> SELECT code_id, code, code_name,
+		code_content FROM comcode_info WHERE code_upcode = 'SYSTEM' AND
+		code_state = 'Y'
+	</select>
+	<!-- 통신방식 리스트 -->
+	<select id="comType" resultMap="comCodeMap"> SELECT code_id, code, code_name,
+		code_content FROM comcode_info WHERE code_upcode = 'ComType' AND
+		code_state = 'Y'
+	</select>
+	<!-- <select id="comType" resultType="comTypeInfoVO"> -->
+	<!-- SELECT com_type_id AS comTypeId, -->
+	<!-- com_type_name AS comTypeName -->
+	<!-- FROM com_type_info -->
+	<!-- WHERE com_type_state = 'Y' -->
+	<!-- </select> -->
+	<!-- 서버기기명 중복체크 -->
+	<select id="checkName" parameterType="String" resultType="java.lang.Integer">
+	SELECT COUNT(system_name)
+	FROM system_info
+	WHERE system_name = #{checkName} 
+	  AND system_state = 'Y' 	
+	</select>
+	<!-- last system_num -->
+	<select id="systemNum" parameterType="String" resultType="java.lang.Integer"> SELECT
+		IF(MAX(system_num) is null , 0, MAX(system_num)) AS system_num FROM
+		system_info WHERE server_type_code = #{serverTypeCode}
+	</select>
+	<insert id="systemInfoInsert" parameterType="systemInfoVO"> INSERT INTO
+		system_info (system_name, system_num, system_state, system_sdate,
+		system_ip_out, system_port_out, system_ip_in, system_port_in,
+		system_cpu_count, system_memory, etc, server_type_code) VALUES
+		(#{systemName}, #{systemNum}, #{systemState}, now(), #{systemIpOut},
+		#{systemPortOut}, #{systemIpIn}, #{systemPortIn}, #{systemCpuCount},
+		#{systemMemory}, #{etc}, #{serverTypeCode})
+	</insert>
+	<!-- system_id -->
+	<select id="systemId" parameterType="String" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT system_id
+	FROM system_info
+	WHERE system_name = #{systemName}
+	  AND system_state <> 'D'
+	]]>
+	</select>
+	<!-- DS서버 설정정보 등록 -->
+	<insert id="mapdownManageInsert" parameterType="systemInfoVO"> INSERT INTO
+		mapdown_manage_info (session_max_idletime, session_max_bandwidth,
+		total_max_bandwidth, system_id) VALUES (#{sessionMaxIdletime},
+		#{sessionMaxBandwidth}, #{totalMaxBandwidth}, #{systemId})
+	</insert>
+
+	<!-- mapdown_manage_id -->
+	<select id="manageId" parameterType="String" resultType="java.lang.Integer"> SELECT
+		mapdown_manage_id FROM mapdown_manage_info WHERE system_id =
+		#{systemId}
+	</select>
+	<!-- 통신방식 등록 -->
+	<insert id="comSetInsert" parameterType="systemInfoVO"> INSERT INTO
+		com_set_info (com_set_cnt, com_set_state, com_set_sdate,
+		mapdown_manage_id, system_id, com_type_code) VALUES (#{comSetCnt},
+		'Y', now(), #{mapdownManageId}, #{systemId}, #{comTypeCode})
+	</insert>
+	<!-- com_set_id 획득 -->
+	<select id="comSetId" parameterType="String" resultType="java.lang.Integer"> SELECT
+		com_set_id FROM com_set_info WHERE system_id = #{systemId} ORDER BY
+		com_set_id DESC LIMIT 1</select>
+	<!-- ds_connect_info 등록 -->
+	<insert id="dsConnectInsert" parameterType="systemInfoVO"> INSERT INTO
+		ds_connect_info (ds_connect_cnt, ds_connect_state, com_set_id,
+		mapdown_manage_id, system_id, com_type_code) VALUES (0, 'Y',
+		#{comSetId}, #{mapdownManageId}, #{systemId}, #{comTypeCode})
+	</insert>
+
+	<!-- com_set_info 기준값 획득 -->
+	<select id="defaultComSetList" parameterType="String"
+		resultType="systemInfoVO">
+  <![CDATA[
+  SELECT 
+           MAX(com_set_cnt) AS comSetCnt,
+           com_type_code AS comTypeCode,
+           com_set_state AS comSetState,
+		   SUB.code_name AS comTypeName
+  FROM com_set_info csi JOIN (
+           SELECT code, code_name
+           from comcode_info 
+  WHERE code_upcode = 'ComType') SUB
+           ON csi.com_type_code = SUB.code
+           GROUP BY com_type_code
+  ]]>
+	</select>
+
+	<!-- 서버기기 상세정보 -->
+	<select id="systemInfo" parameterType="String" resultMap="systemInfoMap">
+	<![CDATA[
+SELECT SI.system_id, 
+		   SI.system_name, 
+		   SI.system_num, 
+		   SI.system_state, 
+		   SI.system_sdate, 
+		   SI.system_ip_out, 
+		   SI.system_port_out, 
+		   SI.system_ip_in, 
+		   SI.system_port_in, 
+		   SI.system_cpu_count, 
+		   SI.system_memory, 
+		   SI.etc, 
+		   SI.server_type_code,
+		   CI.code_name AS serverTypeName
+	FROM system_info SI, comcode_info CI
+	WHERE SI.system_id = #{systemId}
+	  AND CI.code_upcode = "SYSTEM"
+	  AND CI.code = SI.server_type_code
+	  AND SI.system_state <> 'D'
+      ORDER BY SI.system_id DESC LIMIT 1
+	]]>
+	</select>
+	<!-- 통식방식 상세정보 -->
+	<select id="comTypeInfo" parameterType="String" resultType="systemInfoVO"> 
+  <![CDATA[
+ SELECT CSI.com_set_id AS comSetId, 
+CSI.com_set_cnt AS comSetCnt, 
+CSI.com_set_state AS comSetState, 
+CSI.system_id AS systemId, 
+CSI.com_type_code AS comTypeCode,
+CI.code_name AS comTypeName
+FROM com_set_info  CSI, comcode_info CI
+WHERE CSI.system_id = #{systemId}
+AND CI.code_upcode = 'ComType'
+AND CI.code = CSI.com_type_code
+  ]]>
+	</select>
+	<!-- SELECT A.com_type_id AS comTypeId, A.com_type_name AS comTypeName, 
+		B.com_set_id AS comSetId, B.com_set_cnt AS comSetCnt, B.com_set_state AS 
+		comSetState, '#FFFFFF' AS color FROM (SELECT * FROM com_type_info WHERE com_type_state 
+		= 'Y') A LEFT JOIN (SELECT * FROM com_set_info WHERE system_id = #{systemId} 
+		AND com_set_state = 'Y') B ON A.com_type_id = B.com_type_id WHERE B.com_type_id 
+		IS NULL UNION SELECT A.com_type_id AS comTypeId, A.com_type_name AS comTypeName, 
+		B.com_set_id AS comSetId, B.com_set_cnt AS comSetCnt, B.com_set_state AS 
+		comSetState, 'E6E6FA' AS color FROM (SELECT * FROM com_type_info WHERE com_type_state 
+		= 'Y') A LEFT JOIN (SELECT * FROM com_set_info WHERE system_id = #{systemId} 
+		AND com_set_state = 'Y') B ON A.com_type_id = B.com_type_id WHERE B.com_type_id 
+		IS NOT NULL -->
+	<!-- 서비스운영 상세정보 -->
+	<select id="mapdownManageInfo" parameterType="String"
+		resultType="systemInfoVO"> 
+		SELECT 
+		session_max_bandwidth AS sessionMaxBandwidth,
+		session_max_idletime AS sessionMaxIdletime, 
+		total_max_bandwidth AS totalMaxBandwidth, 
+		mapdown_manage_id AS mapdownManageId FROM
+		mapdown_manage_info WHERE system_id = #{systemId} LIMIT 1
+	</select>
+	<!-- 기존 등록 서비스 운영정보 삭제 -->
+	<delete id="mapdownManageDelete" parameterType="systemInfoVO"> DELETE FROM
+		mapdown_manage_info WHERE mapdown_manage_id = #{mapdownManageId} AND
+		system_id = #{systemId}
+	</delete>
+	<!-- 기존 등록 통식방식 삭제 -->
+	<update id="comSetDelete" parameterType="systemInfoVO"> UPDATE com_set_info SET
+		com_set_state = 'D' WHERE mapdown_manage_id = #{mapdownManageId} AND
+		system_id = #{systemId}
+	</update>
+	<!-- 서버기기정보 수정 -->
+	<update id="systemInfoUpdate" parameterType="systemInfoVO"> UPDATE system_info
+		SET system_name = #{systemName}, system_state = #{systemState},
+		system_ip_out = #{systemIpOut}, system_port_out = #{systemPortOut},
+		system_ip_in = #{systemIpIn}, system_port_in = #{systemPortIn},
+		system_cpu_count = #{systemCpuCount}, system_memory = #{systemMemory},
+		etc = #{etc}, system_num = #{systemNum}, server_type_code =
+		#{serverTypeCode} WHERE system_id = #{systemId}
+	</update>
+	<!-- 서버기기정보 삭제 -->
+	<update id="systemInfoDelete" parameterType="systemInfoVO"> UPDATE system_info
+		SET system_state = 'D' WHERE system_id = #{systemId}
+	</update>
+
+	<!-- DS 서버기기정보 조회 -->
+	<select id="dsSystemInfoSelect" resultType="com.btb.mdcs.model.DsInfoVo">
+		SELECT system_ip_in AS host,
+		system_port_in AS port,
+		system_num AS systemId
+		FROM system_info
+		WHERE system_state = 'Y'
+		AND server_type_code = 1
+		AND system_ip_in is not null
+	</select>
+  
+  <!-- DS 서버기기정보 조회 -->
+  <select id="dsSystemInfo" parameterType="String" resultType="com.btb.mdcs.model.DsInfoVo">
+    SELECT system_ip_in AS host,
+    system_port_in AS port,
+    system_num AS systemId
+    FROM system_info
+    WHERE system_state = 'Y'
+    AND server_type_code = 1
+    AND system_ip_in is not null
+    AND system_id = #{systemId}
+  </select>
+
+</mapper>

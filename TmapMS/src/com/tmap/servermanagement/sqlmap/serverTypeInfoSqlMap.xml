@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="serverTypeInfoSqlMap">
+
+<!-- 서버구분정보 resultMap -->
+<resultMap id="serverTypeInfoMap" type="serverTypeInfoVO">
+    <result property="rownum"			 column="ROWNUM"			  javaType="java.lang.String" />
+    <result property="serverTypeId"		 column="server_type_id"	  javaType="java.lang.String" />
+    <result property="serverTypeName"	 column="server_type_name"	  javaType="java.lang.String" />
+    <result property="serverTypeContent" column="server_type_content" javaType="java.lang.String" />
+    <result property="serverTypeCode"	 column="server_type_code" 	  javaType="java.lang.String" />
+    <result property="serverTypeState"	 column="server_type_state"	  javaType="java.lang.String" />
+    <result property="serverTypeSdate"	 column="server_type_sdate"	  javaType="java.lang.String" />
+    <result property="etc"				 column="etc"				  javaType="java.lang.String" />
+</resultMap>
+
+<!-- 서버 구분 정보 리스트 수 -->
+<select id="countServerTypeInfoList" parameterType="serverTypeInfoVO" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(*)
+	FROM server_type_info
+	WHERE server_type_state <> 'D'
+	  AND server_type_name LIKE CONCAT('%',#{serverTypeName},'%')
+	  AND server_type_code LIKE CONCAT('%',#{serverTypeCode},'%')
+	]]>
+</select>
+
+<!-- 서버 구분 정보 리스트 -->
+<select id="serverTypeInfoList" parameterType="serverTypeInfoVO" resultMap="serverTypeInfoMap">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum, 
+		   ST.server_type_id, 
+		   ST.server_type_name, 
+		   ST.server_type_content, 
+		   ST.server_type_code, 
+		   ST.server_type_state, 
+		   ST.server_type_sdate, 
+		   ST.etc
+	FROM server_type_info ST, (select @RNUM:=0)R
+	WHERE server_type_state <> 'D'
+	  AND server_type_name LIKE CONCAT('%',#{serverTypeName},'%')
+	  AND server_type_code LIKE CONCAT('%',#{serverTypeCode},'%')
+	ORDER BY ST.server_type_sdate DESC  
+	]]>
+</select>
+
+<!-- 타입 중복체크 -->
+<select id="checkType" parameterType="String" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(server_type_name)
+	FROM server_type_info
+	WHERE server_type_name = #{checkType} 
+	  AND server_type_state <> 'D'
+  	]]>
+</select>
+
+<!-- 타입 중복체크 -->
+<select id="checkCode" parameterType="String" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(server_type_code)
+	FROM server_type_info
+	WHERE server_type_code = #{checkCode} 
+	  AND server_type_state <> 'D'
+  	]]>
+</select>
+
+<!-- 서버 구분 등록 -->
+<insert id="serverTypeInsert" parameterType="serverTypeInfoVO">
+	INSERT
+	INTO server_type_info (server_type_name, 
+						   server_type_content, 
+						   server_type_code, 
+						   server_type_state, 
+						   server_type_sdate)
+	VALUES (#{serverTypeName}, 
+			#{serverTypeContent}, 
+			#{serverTypeCode}, 
+			#{serverTypeState}, 
+			now())						   
+</insert>
+
+<!-- serverTypeId --> 
+<select id="serverTypeId" resultType="java.lang.Integer" parameterType="String">
+	<![CDATA[
+	SELECT server_type_id AS serverTypeId
+	FROM server_type_info
+	WHERE server_type_name = #{serverTypeName}
+	  AND server_type_state <> 'D'
+	]]>  
+</select>
+
+<!-- 서버 구분 Detail -->
+<select id="serverTypeInfo" parameterType="String" resultMap="serverTypeInfoMap">
+	<![CDATA[
+	SELECT server_type_name, 
+		   server_type_content, 
+		   server_type_code, 
+		   server_type_state, 
+		   DATE_FORMAT(server_type_sdate, '%Y-%m-%d') AS server_type_sdate,
+		   server_type_id
+	FROM server_type_info
+	WHERE server_type_id = #{serverTypeId}
+	  AND server_type_state <> 'D'
+	]]>  		   
+</select>
+
+<!-- 서버 구분 수정 -->
+<update id="serverTypeUpdate" parameterType="serverTypeInfoVO">
+	UPDATE server_type_info
+	SET server_type_content = #{serverTypeContent}, 
+		server_type_state = #{serverTypeState}
+	WHERE server_type_id = #{serverTypeId}						   
+</update>
+
+<!-- 서버 구분 삭제 -->
+<update id="serverTypeDelete" parameterType="String">
+	UPDATE server_type_info
+	SET server_type_state = 'D'
+	WHERE server_type_id = #{serverTypeId}					   
+</update>
+
+</mapper>

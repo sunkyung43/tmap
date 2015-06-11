@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="settingAllInfoSqlMap">
+
+<resultMap id="settingAllInfoMap" type="settingAllInfoVO">
+    <result property="comTypeCode"	  column="com_type_code"		javaType="java.lang.String" />
+    <result property="comTypeName"	  column="com_type_name"	javaType="java.lang.String" />
+    <result property="comState"	  	  column="com_state"		javaType="java.lang.String" />
+    <result property="comCountSet" 	  column="com_count_set" 	javaType="java.lang.String" />
+</resultMap>
+
+<!-- ipFilter 이전 목록 삭제 -->
+<update id="ipFilterDelete">
+	UPDATE ip_filter_info
+	SET ip_filter_state = 'D'
+</update>
+
+<!-- ipFilter 리스트 -->
+<select id="ipFilter" resultType="settingAllInfoVO">
+	SELECT ip_filter AS ipFilter
+	FROM ip_filter_info
+	WHERE ip_filter_state = 'Y'
+</select>
+
+<!-- 제한IP 설정 -->
+<insert id="ipFilterUpdate" parameterType="java.lang.String">
+	INSERT 
+	INTO ip_filter_info (ip_filter,
+						 ip_filter_state)
+	VALUES (#{ipFilter},
+			'Y')							 
+</insert>
+
+<!-- ComSetInfo -->
+<select id="defaultComSetList" parameterType="String" resultType="settingAllInfoVO">
+  <![CDATA[
+  SELECT 
+           MAX(com_set_cnt) AS comSetCnt,
+           com_type_code AS comTypeCode,
+           com_set_state AS comSetState,
+		   SUB.code_name AS comTypeName
+  FROM com_set_info csi JOIN (
+           SELECT code, code_name
+           from comcode_info 
+  WHERE code_upcode = 'ComType') SUB
+           ON csi.com_type_code = SUB.code
+           GROUP BY com_type_code
+  ]]> 
+  </select>
+<!-- dsComInfo -->
+<select id="dsComInfo" resultMap="settingAllInfoMap">
+	SELECT com_type_id, 
+		   com_count_set,
+		   com_type_name,
+		   com_state
+	FROM ds_com_state
+	ORDER BY com_type_id
+</select>
+
+<!-- dsBandWidth -->
+<select id="dsBandWidth" resultType="settingAllInfoVO">
+	SELECT session_max_idletime AS sessionMaxIdletime,
+    	   session_max_bandwidth AS sessionMaxBandwidth,
+    	   total_max_bandwidth AS totalMaxBandwidth
+	FROM ds_bandwidth_set    	   
+</select>
+
+
+<!-- DS허용유무 설정 -->
+<update id="dsComStateUpdate" parameterType="settingAllInfoVO">
+	UPDATE com_set_info
+	SET com_set_state = #{comSetState},
+        com_set_cnt = #{comSetCnt}
+	WHERE com_type_code = #{comTypeCode}
+</update>
+	
+<!-- DS동시접속자 설정 -->
+<update id="dsComCntUpdate" parameterType="settingAllInfoVO">
+	UPDATE ds_com_state
+	SET com_count_set = #{comCountSet}
+	WHERE com_type_id = #{comTypeId}
+</update>
+
+<!-- com_set_info테이블 수정 -->
+<update id="comSecInfoUpdate" parameterType="settingAllInfoVO">
+	UPDATE com_set_info
+	SET com_set_cnt = #{comCountSet}
+	WHERE com_type_id = #{comTypeId}
+	  AND com_set_state = 'Y'
+</update>
+
+<!-- 최초등록 여부확인 -->
+<select id="selectCount" resultType="java.lang.Integer">
+	SELECT COUNT(session_max_idletime) FROM mapdown_manage_info
+</select>
+
+<!-- DS대역폭 최초등록 -->
+<insert id="dsBandWidthInsert" parameterType="settingAllInfoVO">
+	INSERT 
+	INTO mapdown_manage_info (session_max_idletime,
+    					   session_max_bandwidth,
+    					   total_max_bandwidth,
+    					   system_id)
+	VALUES (#{sessionMaxIdletime}, 
+			#{sessionMaxBandwidth}, 
+			#{totalMaxBandwidth},
+			#{systemId})	    					   		
+</insert>	
+<!-- DS대역폭 설정 -->
+<update id="dsBandWidthUpdate" parameterType="settingAllInfoVO">
+	UPDATE mapdown_manage_info
+	SET session_max_idletime = #{sessionMaxIdletime},
+    	session_max_bandwidth = #{sessionMaxBandwidth},
+    	total_max_bandwidth = #{totalMaxBandwidth}
+</update>
+
+<!-- mapdown_manage_info테이블 수정 -->
+<update id="mapdownManageInfoUpdate" parameterType="settingAllInfoVO">
+	UPDATE mapdown_manage_info
+	SET session_max_idletime = #{sessionMaxIdletime},
+    	session_max_bandwidth = #{sessionMaxBandwidth},
+    	total_max_bandwidth = #{totalMaxBandwidth}
+    WHERE system_id = #{systemId}	
+</update>
+		
+	
+</mapper>

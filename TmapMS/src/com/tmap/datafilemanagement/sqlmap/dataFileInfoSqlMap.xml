@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.dataFileSqlMap">
+	<select id="dataFileInfoList" parameterType="dataFileInfoVO" resultType="dataFileInfoVO">
+		<include refid="dataFileInfoList-pageing-start"/>
+		select fileinfo.data_file_id AS dataFileId
+			 , fileinfo.data_file_name AS dataFileName
+			 , fileinfo.data_file_state AS dataFileState
+			 , DATE_FORMAT(fileinfo.data_file_sdate, '%Y-%m-%d') AS dataFileSdate
+			 , typeinfo.data_type_name AS dataTypeName
+			 , (select count(v_info.file_ver_id) 
+				  from file_version_info v_info 
+				 where v_info.data_file_id = fileinfo.data_file_id 
+				   and v_info.file_ver_state = 'Y') AS useVersionCount
+			 , (select count(v_info.file_ver_id) 
+				  from file_version_info v_info 
+				 where v_info.data_file_id = fileinfo.data_file_id 
+				   and v_info.file_ver_state in ('Y', 'N')) AS totalUseVersionCount			 
+		  from data_file_info fileinfo
+			 , data_storage_info storageinfo
+			 , data_type_info typeinfo
+		 where fileinfo.storage_id = storageinfo.storage_id
+		   and fileinfo.data_type_id = typeinfo.data_type_id
+		<include refid="dataFileInfoList-searchCondition"/>
+		order by fileinfo.data_file_sdate ASC
+		<include refid="dataFileInfoList-pageing-end"/>
+	</select>
+	
+	<select id="countDataFileInfoList" parameterType="dataFileInfoVO" resultType="java.lang.Integer">
+		select count(fileinfo.data_file_id) totalCount
+		  from data_file_info fileinfo
+			 , data_storage_info storageinfo
+			 , data_type_info typeinfo
+		 where fileinfo.storage_id = storageinfo.storage_id
+		   and fileinfo.data_type_id = typeinfo.data_type_id
+		<include refid="dataFileInfoList-searchCondition"/>
+	</select>
+	
+	<select id="dataFileInfo" parameterType="String" resultType="dataFileInfoVO">
+		select fileinfo.data_file_id AS dataFileId
+			 , fileinfo.data_file_name AS dataFileName
+			 , fileinfo.data_file_state AS dataFileState
+			 , fileinfo.data_file_content AS dataFileContent
+			 , DATE_FORMAT(fileinfo.data_file_sdate, '%Y-%m-%d') AS dataFileSdate
+			 , typeinfo.data_type_id AS dataTypeId
+			 , typeinfo.data_type_name AS dataTypeName
+			 , storageinfo.storage_id AS storageId
+			 , storageinfo.storage_name AS storageName
+			 , storageinfo.storage_mount AS storageMount
+		  from data_file_info fileinfo
+			 , data_storage_info storageinfo
+			 , data_type_info typeinfo
+		 where fileinfo.storage_id = storageinfo.storage_id
+		   and fileinfo.data_type_id = typeinfo.data_type_id
+		   <include refid="dataFileInfo-where"/>
+	</select>
+	
+	<sql id="dataFileInfo-where">
+		and fileinfo.data_file_id = #{dataFileId}
+	</sql>
+	
+	<sql id="dataFileInfoList-searchCondition">
+		<if test="searchDataFileState.equalsIgnoreCase('ALL')">
+		and fileinfo.data_file_state in ('Y', 'N')
+		</if>
+		<if test="!searchDataFileState.equalsIgnoreCase('ALL')">
+		and fileinfo.data_file_state = #{searchDataFileState}
+		</if>
+		<if test="!searchDataType.equalsIgnoreCase('ALL')">
+		and typeinfo.data_type_id = #{searchDataType}
+		</if>
+		<if test="searchDataFileName != null and !searchDataFileName.equalsIgnoreCase('')">
+		and fileinfo.data_file_name like concat(#{searchDataFileName},'%')
+		</if>
+	</sql>
+	
+	<sql id="dataFileInfoList-pageing-start">
+	SELECT *
+	FROM (
+	SELECT @NO := @NO + 1 AS ROWNUM, A.*
+	FROM
+	  (
+	</sql>
+	
+	<sql id="dataFileInfoList-pageing-end">
+	  ) A,
+	  ( SELECT @NO := 0 ) B 
+	) C
+	ORDER BY C.ROWNUM DESC
+	</sql>
+	
+	<insert id="dataFileInfoInsert" parameterType="dataFileInfoVO">
+		insert into data_file_info (data_file_name, data_file_store, data_file_state, data_type_id, storage_id, data_file_content, data_file_sdate)
+		values(
+			  #{dataFileName}
+			, "N"
+			, #{dataFileState}
+			, #{dataTypeId}
+			, #{storageId}
+			, #{dataFileContent}
+			, now()
+		)
+		<selectKey resultType="String" keyProperty="dataFileId">
+		SELECT LAST_INSERT_ID()
+		</selectKey>		
+	</insert>
+	
+	<update id="dataFileInfoUpdate" parameterType="dataFileInfoVO">
+		update data_file_info
+		   set data_file_name = #{dataFileName}
+		     , data_file_state = #{dataFileState}
+		     , data_type_id = #{dataTypeId}
+		     , storage_id = #{storageId}
+		     , data_file_content = #{dataFileContent}
+		 where data_file_id = #{dataFileId}
+	</update>
+	
+	<update id="dataFileInfoDelete" parameterType="String">
+		update data_file_info
+		   set data_file_state = "D"
+		 where data_file_id = #{dataFileId}
+	</update>
+</mapper>

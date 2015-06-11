@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.osVerInfoSqlMap">
+
+<!-- OS버전정보 리스트 수 -->
+<select id="countOsVerInfoList" parameterType="com.tmap.appmanagement.vo.OsVerInfoListVO" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT count(*) 
+	FROM os_ver_info 
+	WHERE os_ver_state <> 'D' 
+	]]>   
+	<if test="osVerName != null">AND os_ver_name LIKE CONCAT('%',#{osVerName},'%')</if>
+	<if test="osDivision != null">AND os_division LIKE CONCAT('%',#{osDivision},'%')</if>
+</select>
+
+<!-- OS버전정보 리스트 (단말모델)--> 
+<select id="phOsVerInfoList" parameterType="com.tmap.appmanagement.vo.OsVerInfoListVO" resultType="com.tmap.appmanagement.vo.OsVerInfoListVO">
+	SELECT os_ver_id AS osVerInfoSeq,
+		   os_ver_name AS osVerName,
+		   os_ver_content AS osVerContent,
+		   os_ver_sdate AS osVerStoreDate,
+		   os_ver_state AS osVerState,
+		   os_division AS osDivision		   
+	FROM os_ver_info
+	WHERE os_ver_state = 'Y'
+		<if test="osVerName != null">AND os_ver_name LIKE CONCAT('%',#{osVerName},'%')</if>
+		<if test="osDivision != null">AND os_division LIKE CONCAT('%',#{osDivision},'%')</if>
+	ORDER BY os_ver_name DESC 
+	   		   
+</select>
+
+<!-- OS버전정보 리스트 -->
+<select id="osVerInfoFrame" parameterType="com.tmap.appmanagement.vo.OsVerInfoListVO" resultType="com.tmap.appmanagement.vo.OsVerInfoListVO">
+	<![CDATA[
+	SELECT os_ver_id AS osVerInfoSeq,
+		   os_ver_name AS osVerName,
+		   os_ver_content AS osVerContent,
+		   os_ver_sdate AS osVerStoreDate,
+		   os_ver_state AS osVerState,
+		   os_division AS osDivision	
+	FROM os_ver_info
+	WHERE os_ver_state <> 'D'
+	]]> 
+		<if test="osVerName != null">AND os_ver_name LIKE CONCAT('%',#{osVerName},'%')</if>
+		<if test="osDivision != null">AND os_division LIKE CONCAT('%',#{osDivision},'%')</if>
+	ORDER BY os_ver_name DESC 
+</select>
+
+<!-- OS버전정보 등록 -->
+<insert id="osVerInfoInsert" parameterType="com.tmap.appmanagement.vo.OsVerInfoListVO">
+	INSERT 
+	INTO os_ver_info (os_ver_name,
+		  			  os_ver_content,
+		   		 	  os_ver_sdate,
+		   		 	  os_ver_state,
+                      os_division) 
+	VALUES (#{osVerName}, 
+		    #{osVerContent}, 
+		    CURRENT_TIMESTAMP, 
+		    #{osVerState},
+            #{osDivision})
+</insert>
+
+<!-- OS버전정보 상세정보 -->
+<select id="osVerModifyList" parameterType="com.tmap.appmanagement.vo.OsVerInfoListVO" resultType="com.tmap.appmanagement.vo.OsVerInfoListVO">
+	SELECT os_ver_id AS osVerInfoSeq,
+		   os_ver_name AS osVerName,
+		   os_ver_content AS osVerContent,
+		   os_ver_sdate AS osVerStoreDate,
+		   os_ver_state AS osVerState,
+           os_division AS osDivision
+	FROM os_ver_info 
+	WHERE os_ver_id=#{osVerInfoSeq}
+</select>
+
+<!-- OS버전정보 수정-->
+<update id="osVerInfoUpdate" parameterType="com.tmap.appmanagement.vo.OsVerInfoListVO">
+	UPDATE os_ver_info 
+	SET os_ver_content = #{osVerContent}, 
+		os_ver_state = #{osVerState},
+		os_division = #{osDivision}
+	WHERE os_ver_id=#{osVerInfoSeq}
+</update>
+
+<!-- OS버전정보 삭제 -->
+<update id="osVerInfoDelete" parameterType="com.tmap.appmanagement.vo.OsVerInfoListVO">
+	UPDATE os_ver_info 
+	SET os_ver_state = 'D' 
+	WHERE os_ver_id=#{osVerInfoSeq}
+</update>
+
+</mapper>

@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.authoritySqlMap">
+
+<!-- 권한정보 리스트 수 -->
+<select id="countAuthorityInfoList" parameterType="authorityInfoListVO" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT count(*) 
+	FROM authority_info 
+	WHERE authority_menu_id LIKE CONCAT('%',#{menuAuthorityId},'%') 
+	  AND authority LIKE CONCAT('%',#{authority},'%')
+	  AND authority_state <> 'D'
+	]]>   
+</select>
+
+<!-- 권한정보 리스트 -->
+<select id="authorityInfoList" parameterType="authorityInfoListVO" resultType="authorityInfoListVO">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum,
+		   authority.authority_menu_id AS menuAuthorityId,
+		   authority.authority,
+		   authority.authority_state AS useState,
+		   authority.etc
+	FROM authority_info authority, (select @RNUM:=0)R
+	WHERE authority.authority_menu_id LIKE CONCAT('%',#{menuAuthorityId},'%')  
+	  AND authority.authority LIKE CONCAT('%',#{authority},'%')
+	  AND authority.authority_state <> 'D'
+	ORDER BY authority.authority_menu_id 
+	]]>    		   
+</select>
+
+<!-- 메뉴 리스트 -->
+<select id="menuList" resultType="menuInfoListVO">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum,
+		   menu.menu_id AS menuId, 
+		   menu.menu_hi_id AS hMenuId, 
+		   menu.menu_name AS menuName,
+		   menu.menu_state AS useFlag 
+	FROM menu_info menu, (select @RNUM:=0)R
+	WHERE menu.menu_state <> 'D' 
+	ORDER BY menu.menu_id
+	]]>
+</select>
+
+<!-- 권한정보 등록 -->
+<insert id="authorityInfoInsert" parameterType="authorityInfoListVO">
+	INSERT 
+	INTO authority_info (authority_menu_id,
+						 authority,
+						 authority_state,
+						 etc) 
+	VALUES (#{menuAuthorityId}, 
+		    #{authority}, 
+		    #{useState}, 
+		    #{etc})
+</insert>
+
+<!-- 메뉴권한 등록 -->
+<insert id="menuAuthorityInsert" parameterType="authorityInfoListVO">
+	INSERT
+	INTO authority_menu_info (authority_menu_id,
+							  menu_id)
+	VALUES (#{menuAuthorityId},
+			#{menuId})
+</insert>
+
+<!-- 권한정보 상세정보 -->
+<select id="authorityModifyInfo" parameterType="authorityInfoListVO" resultType="authorityInfoListVO">
+	SELECT  authority_menu_id AS menuAuthorityId,
+			authority AS authority,
+			authority_state AS useState,
+			etc
+	FROM authority_info 
+	WHERE authority_menu_id=#{menuAuthorityId}
+</select>
+
+<!-- 메뉴권한 리스트 -->
+<select id="menuId" parameterType="authorityInfoListVO" resultType="menuInfoListVO">
+	<![CDATA[
+	SELECT 	@RNUM := @RNUM + 1 AS rownum,
+			A.menu_id AS menuId, 
+			A.menu_hi_id AS hMenuId, 
+			A.menu_name AS menuName, 
+		    CASE WHEN B.authority_menu_id IS NULL THEN 'N' ELSE 'Y' END AS useFlag
+	FROM menu_info A left outer join authority_menu_info B on A.menu_id=B.menu_id AND authority_menu_id=#{menuAuthorityId} join (select @RNUM:=0)R
+	WHERE A.menu_state<>'D'
+	]]>  
+</select>
+
+<!-- 권한정보 수정-->
+<update id="authorityInfoUpdate" parameterType="authorityInfoListVO">
+	UPDATE authority_info 
+	SET authority_menu_id = #{menuAuthorityId}, 
+		authority = #{authority}, 
+		authority_state = #{useState}, 
+		etc = #{etc} 
+	WHERE authority_menu_id=#{menuAuthorityId}
+</update>
+
+<!-- 메뉴권한 삭제 -->
+<delete id="menuAuthorityDelete" parameterType="authorityInfoListVO">
+	DELETE FROM authority_menu_info WHERE authority_menu_id=#{menuAuthorityId}
+</delete>
+
+<!-- 권한정보 수정 -->
+<update id="authorityInfoDelete" parameterType="authorityInfoListVO">
+	UPDATE authority_info 
+	SET authority_state = 'D' 
+	WHERE authority_menu_id=#{AuthorityId}
+</update>
+
+<!-- 아이디 중복체크 -->
+<select id="countSameId" parameterType="java.lang.String" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(authority_menu_id) 
+	FROM authority_info 
+	WHERE authority_menu_id = #{id}
+	  AND authority_state <> 'D'
+	]]>  
+</select>
+
+</mapper>

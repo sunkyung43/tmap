@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tmap.sqlMap.certTimeSqlMap">
+
+<!-- 기존 인증 시간 -->
+<select id="certTime" resultType="com.tmap.systemmanagement.vo.CertTimeVO">
+	<![CDATA[
+	SELECT certTime / 1000 AS certTime,
+	       certtime_sdate AS certTimeStoreDate,
+	       certtime_id AS certTimeInfoSeq,
+	       certtime_state AS certTimeState 
+	FROM certtime_info 
+	WHERE certtime_state <> 'N'
+	]]> 
+</select>
+
+<!-- 기존 보안 코드 -->
+<select id="securityCode" resultType="com.tmap.systemmanagement.vo.CertTimeVO">
+	<![CDATA[
+	SELECT security_code_id AS securityCodeSeq, 
+	       security_code AS securityCode, 
+	       security_code_sdate AS securityCodeStoreDate, 
+	       security_code_state AS securityCodeState 
+	FROM security_code_info
+	WHERE security_code_state <> 'N'
+	]]> 
+</select>
+
+<!-- 기존 인증 시간 삭제 -->
+<update id="certTimeDelete" parameterType="com.tmap.systemmanagement.vo.CertTimeVO">
+	UPDATE certtime_info
+	SET certtime_state = 'N'
+	WHERE certtime_id = #{certTimeInfoSeq}
+</update>
+
+<!-- 인증 시간 수정 -->
+<insert id="certTimeUpdate" parameterType="com.tmap.systemmanagement.vo.CertTimeVO">
+	INSERT 
+	INTO certtime_info (certTime,
+	       			    certtime_sdate,
+				        certtime_state,
+				        etc)
+	VALUES (#{certTime},
+			CURRENT_TIMESTAMP,
+			'Y',
+			'')				       	
+</insert>
+
+<!-- 기존 보안 코드 삭제 -->
+<update id="securityCodeDelete" parameterType="com.tmap.systemmanagement.vo.CertTimeVO">
+	UPDATE security_code_info
+	SET security_code_state = 'N'
+	WHERE security_code_id = #{securityCodeSeq}
+</update>
+
+<!-- 보안 코드 수정 -->
+<insert id="securityCodeUpdate" parameterType="com.tmap.systemmanagement.vo.CertTimeVO">
+	INSERT 
+	INTO security_code_info (security_code,
+	       			   		 security_code_sdate,
+				       		 security_code_state,
+				       		 etc)
+	VALUES (#{securityCode},
+			CURRENT_TIMESTAMP,
+			'Y',
+			'')				       	
+</insert>
+
+<!-- 히스토리 관련 시작-->
+
+<!-- 마지막 id값 -->
+<select id="lastSeq" resultType="java.lang.Integer">
+	SELECT MAX(certtime_id) FROM certtime_info
+</select>
+
+<select id="lastSeq2" resultType="java.lang.Integer">
+	SELECT MAX(security_code_id) FROM security_code_info
+</select>
+
+</mapper>

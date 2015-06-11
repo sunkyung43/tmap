@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="releaseServerInfoSqlMap">
+  <select id="rsServerList" resultType="systemInfoVO"> 
+  SELECT system_id AS systemId, 
+  system_name AS systemName, 
+  system_ip_out AS systemIpOut, 
+  system_port_out AS systemPortOut 
+  FROM system_info SI, comcode_info CI 
+  WHERE SI.server_type_code = CI.code 
+  AND CI.code_upcode = "SYSTEM" 
+  AND CI.code = '2' 
+  AND CI.code_state = 'Y'
+  </select>
+  <resultMap id="rsInterfaceInfoMap" type="rsInterfaceInfoVO">
+    <result property="rownum" column="ROWNUM" javaType="java.lang.String" />
+    <result property="interfaceId" column="interface_id" javaType="java.lang.String" />
+    <result property="interfaceProtocol" column="interface_protocol" javaType="java.lang.String" />
+    <result property="interfaceName" column="interface_name" javaType="java.lang.String" />
+    <result property="interfaceContent" column="interface_content" javaType="java.lang.String" />
+    <result property="interfaceState" column="interface_state" javaType="java.lang.String" />
+    <result property="interfaceSdate" column="interface_sdate" javaType="java.lang.String" />
+    <result property="interfaceNum" column="interface_num" javaType="java.lang.String" />
+    <result property="interfaceAlign" column="interface_align" javaType="java.lang.String" />
+  </resultMap>
+  <select id="rsInterfaceList" resultMap="rsInterfaceInfoMap">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum, 
+		   RI.interface_id, 
+		   RI.interface_protocol, 
+		   RI.interface_name, 
+		   RI.interface_content, 
+		   RI.interface_state,
+		   DATE_FORMAT(RI.interface_sdate, '%Y-%m-%d') AS interface_sdate,
+		   RI.interface_num,
+		   RI.interface_align 
+	FROM rs_interface_info RI, (select @RNUM:=0)R
+	WHERE interface_state = 'Y'
+	ORDER BY RI.interface_protocol DESC
+	]]>
+  </select>
+  <resultMap id="messageInfoMap" type="messageInfoListVO">
+    <result property="rownum" column="ROWNUM" javaType="java.lang.String" />
+    <result property="messageSeq" column="message_id" javaType="java.lang.String" />
+    <result property="messageType" column="message_type" javaType="java.lang.String" />
+    <result property="messageCode" column="message_code" javaType="java.lang.String" />
+    <result property="messageCodeValue" column="message_value" javaType="java.lang.String" />
+    <result property="messageContent" column="message_content" javaType="java.lang.String" />
+    <result property="useState" column="message_state" javaType="java.lang.String" />
+  </resultMap>
+  <select id="messageList" resultMap="messageInfoMap"> SELECT message_id, message_type, message_code, message_value, message_content, message_state FROM message_info WHERE message_state = 'Y' AND message_type = 'RS'
+  </select>
+</mapper>

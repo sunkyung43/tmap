@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.appMappingInfoSqlMap">
+  <!-- 매핑정보 resultMap -->
+  <resultMap id="appMappingInfoMap" type="appMappingInfoVO">
+    <result property="rownum" column="ROWNUM" javaType="java.lang.String" />
+    <result property="appMappingId" column="app_mapping_id" javaType="java.lang.String" />
+    <result property="appMappingName" column="app_mapping_name" javaType="java.lang.String" />
+    <result property="appMappingContent" column="app_mapping_content" javaType="java.lang.String" />
+    <result property="appMappingState" column="app_mapping_state" javaType="java.lang.String" />
+    <result property="appName" column="app_name" javaType="java.lang.String" />
+    <result property="appMappingSdate" column="app_mapping_sdate" javaType="java.lang.String" />
+    <result property="appInfoSeq" column="app_id" javaType="java.lang.String" />
+    <result property="appVerName" column="app_ver_name" javaType="java.lang.String" />
+    <result property="appVerId" column="app_ver_id" javaType="java.lang.String" />
+  </resultMap>
+  <!-- 사용가능 App 리스트 resultMap -->
+  <resultMap id="appInfoMap" type="com.tmap.appmanagement.vo.AppInfoListVO">
+    <result property="rownum" column="ROWNUM" javaType="java.lang.String" />
+    <result property="appInfoSeq" column="app_id" javaType="java.lang.String" />
+    <result property="appName" column="app_name" javaType="java.lang.String" />
+    <result property="appContent" column="app_content" javaType="java.lang.String" />
+    <result property="appStoreDate" column="app_store_date" javaType="java.lang.String" />
+    <result property="appState" column="app_state" javaType="java.lang.String" />
+  </resultMap>
+  <!-- 데이터 타입 resultMap -->
+  <resultMap id="dataTypeInfoMap" type="dataTypeInfoVO">
+    <result property="rowSpan" column="rowSpan" javaType="java.lang.String" />
+    <result property="dataTypeId" column="data_type_id" javaType="java.lang.String" />
+    <result property="dataTypeName" column="data_type_name" javaType="java.lang.String" />
+    <result property="dataTypeContent" column="data_type_content" javaType="java.lang.String" />
+  </resultMap>
+  <!-- 데이터 파일 resultMap -->
+  <resultMap id="dataFileInfoMap" type="dataFileInfoVO">
+    <result property="dataFileId" column="data_file_id" javaType="java.lang.String" />
+    <result property="dataFileName" column="data_file_name" javaType="java.lang.String" />
+    <result property="dataFileContent" column="data_file_content" javaType="java.lang.String" />
+    <result property="dataFileState" column="data_file_state" javaType="java.lang.String" />
+    <result property="dataFileSdate" column="data_file_sdate" javaType="java.lang.String" />
+    <result property="dataFileStore" column="data_file_store" javaType="java.lang.String" />
+    <result property="storageName" column="storage_name" javaType="java.lang.String" />
+  </resultMap>
+  <!-- 데이터 파일 버전 resultMap -->
+  <resultMap id="dataVerInfoMap" type="fileVersionInfoVO">
+    <result property="fileVerId" column="file_ver_id" javaType="java.lang.String" />
+    <result property="fileVerName" column="file_ver_name" javaType="java.lang.String" />
+    <result property="fileVerRank" column="file_ver_rank" javaType="java.lang.String" />
+    <result property="fileVerState" column="file_ver_state" javaType="java.lang.String" />
+    <result property="fileVerSdate" column="file_ver_sdate" javaType="java.lang.String" />
+    <result property="etc" column="etc" javaType="java.lang.String" />
+  </resultMap>
+  <!-- last app_mapping_id -->
+  <!-- <select id="appVerId" parameterType="String" resultType="String"> <![CDATA[ SELECT app_ver_id FROM app_mapping_service_info WHERE app_mapping_name = #{appMappingName} AND app_mapping_state <> 'D' ]]> </select> -->
+  <!-- 데이터 매핑 정보 리스트 수 -->
+  <select id="countAppMappingInfoList" parameterType="String" resultType="java.lang.Integer">
+  <![CDATA[
+  SELECT COUNT(*)
+  FROM app_mapping_info
+  WHERE app_mapping_state <> 'D'
+    AND app_mapping_name LIKE CONCAT('%',#{appMappingName},'%')
+  ]]>
+  </select>
+  <!-- 데이터 매핑 정보 리스트 출력 -->
+  <select id="appMappingInfoList" parameterType="appMappingInfoVO" resultMap="appMappingInfoMap">
+  <![CDATA[
+  SELECT @RNUM := @RNUM + 1 AS rownum,
+           mp.app_mapping_id,
+           mp.app_mapping_name,
+           mp.app_mapping_content,
+           mp.app_mapping_state,
+           DATE_FORMAT(mp.app_mapping_sdate, '%Y-%m-%d') AS appMappingSdate
+  FROM app_mapping_info mp, (select @RNUM:=0)R
+  WHERE mp.app_mapping_state <> 'D'
+    AND mp.app_mapping_name LIKE CONCAT('%',#{appMappingName},'%')
+  ORDER BY mp.app_mapping_id DESC
+  ]]>
+  </select>
+  <!-- 사용가능 App정보 리스트 수 -->
+  <select id="countAppList" parameterType="String" resultType="java.lang.Integer">
+  <![CDATA[
+  SELECT COUNT(*)
+  FROM(       
+    SELECT A.app_id, 
+         A.app_name, 
+         A.app_content,
+         A.app_state, 
+         A.app_store_date 
+    FROM(
+      SELECT app_id, 
+           app_name, 
+           app_content, 
+           app_state, 
+           app_store_date
+      FROM app_info
+      WHERE app_state = 'Y')A LEFT JOIN
+      (
+      SELECT AI.app_id, 
+           AI.app_name, 
+           AI.app_content, 
+           AI.app_state, 
+           AI.app_store_date
+      FROM app_info AI, 
+         app_mapping_info AM
+      WHERE AI.app_id = AM.app_id
+        AND AM.app_mapping_state <> 'D')B ON A.app_id = B.app_id
+    WHERE B.app_id IS NULL) C, (select @RNUM:=0)R
+  WHERE C.app_name LIKE CONCAT('%',#{searchAppName},'%')
+  ORDER BY C.app_store_date
+  ]]>
+  </select>
+  <!-- 사용가능 App정보 리스트 출력 -->
+  <select id="appList" parameterType="appMappingInfoVO" resultMap="appInfoMap">
+  <![CDATA[
+ SELECT 	@RNUM := @RNUM + 1 AS rownum,
+            APP.app_id AS appInfoSeq, 
+			APP.app_name AS appName,
+			APP.app_content AS appContent,
+			DATE_FORMAT(APP.app_store_date, '%Y-%m-%d') AS appStoreDate
+	FROM (SELECT * FROM app_info WHERE app_state <> 'D') APP, (select @RNUM:=0)R
+	ORDER BY APP.app_store_date DESC, APP.app_name;
+  ]]>
+  </select>
+  <!-- 앱 데이터 매핑 정보 입력 -->
+  <insert id="appMappingInsert" parameterType="appMappingInfoVO"> 
+  INSERT INTO app_mapping_info 
+  (app_mapping_name, app_mapping_content, app_mapping_state, app_mapping_sdate, app_id) 
+  VALUES (#{appMappingName}, #{appMappingContent}, #{appMappingState}, now(), #{appInfoSeq})
+  </insert>
+  <!-- last app_mapping_id -->
+  <select id="appMappingId" parameterType="String" resultType="String">
+  <![CDATA[
+  SELECT app_mapping_id
+  FROM app_mapping_info
+  WHERE app_mapping_name = #{appMappingName}
+    AND app_mapping_state <> 'D'
+  ]]>
+  </select>
+  <!-- 매핑 서비스(배포) 정보 등록 -->
+  <insert id="appMappingServiceInfoInsert" parameterType="appMappingInfoVO"> 
+  INSERT INTO app_mapping_service_info 
+  ( app_map_service_name, app_map_service_state, app_map_service_distribute, app_map_service_type, app_map_service_sdate, app_mapping_id, app_ver_id, app_id) 
+  VALUES ( "", "W", "W", "W", now(), #{appMappingId}, #{appVerId}, #{appInfoSeq})
+  </insert>
+  <!-- app_map_service_id 검색 -->
+  <select id="appMapServiceId" resultType="java.lang.Integer"> SELECT MAX(app_map_service_id) FROM app_mapping_service_info
+  </select>
+  
+  <!-- app_map_name 중복 검색 -->
+  <select id="appMappingNameCheck" resultType="java.lang.Integer" parameterType="appMappingInfoVO"> 
+ SELECT count(app_mapping_name) FROM app_mapping_info
+         WHERE app_mapping_name = #{appMappingName}
+  </select>
+  
+  
+  <!-- app_mapping_detail_info 등록 -->
+  <insert id="appMappingDetailInfo" parameterType="appMappingInfoVO"> 
+  INSERT INTO app_mapping_detail_info( app_map_detail_state, app_map_detail_sdate, app_Map_service_id, app_ver_id, app_id, app_mapping_id, data_file_id) 
+  VALUES ( 'Y', now(), #{appServiceId}, #{appVerId}, #{appInfoSeq}, #{appMappingId}, #{dataFileId})
+  </insert>
+  <!-- last app_map_detail_id -->
+  <select id="mapDetailId" resultType="java.lang.Integer"> SELECT MAX(app_map_detail_id) FROM app_mapping_detail_info
+  </select>
+  <!-- app_file_detail_info 등록 -->
+  <insert id="appFileDetailInfo" parameterType="appMappingInfoVO"> 
+  INSERT INTO app_file_detail_info ( 
+  app_file_de_state, 
+  app_file_de_sdate, 
+  data_file_id, file_ver_id, 
+  app_map_detail_id, 
+  app_map_service_id, 
+  app_ver_id, app_id, 
+  app_mapping_id) 
+  VALUES (
+  'Y', 
+  now(), 
+  #{dataFileId}, 
+  #{fileVerId}, 
+  #{mapDetailId}, 
+  #{appServiceId}, 
+  #{appVerId}, 
+  #{appInfoSeq}, 
+  #{appMappingId})
+  </insert>
+  <!-- 데이터 타입 리스트 -->
+  <select id="dataTypeList" resultMap="dataTypeInfoMap"> 
+  SELECT data_type_name, data_type_id, data_type_content FROM data_type_info WHERE data_type_state = 'Y'
+  </select>
+  <!-- 데이터 파일 리스트(등록) -->
+  <select id="fileInType" parameterType="appMappingInfoVO" resultMap="dataFileInfoMap">
+  <![CDATA[ 
+       SELECT @RNUM := @RNUM + 1 AS rownum,
+       A.data_file_id,
+       A.data_file_name,
+       A.data_file_content,
+       A.data_file_state,
+       DATE_FORMAT(A.data_file_sdate, '%Y-%m-%d') AS data_file_sdate,
+       A.storage_name 
+  FROM(
+      SELECT FILE.data_file_id,
+           FILE.data_file_name,
+           FILE.data_file_content,
+           FILE.data_file_state,
+           DATE_FORMAT(FILE.data_file_sdate, '%Y-%m-%d') AS data_file_sdate,
+           STORAGE.storage_name
+    FROM data_file_info FILE, data_storage_info STORAGE
+    WHERE FILE.data_file_state = 'Y'
+      AND FILE.storage_id = STORAGE.storage_id
+      AND FILE.data_type_id = #{dataTypeId}
+      AND FILE.data_file_name LIKE CONCAT('%',#{searchDataFileName},'%')) A LEFT JOIN
+  
+    (
+      SELECT DF.data_file_name, 
+           DT.data_type_name,
+           DF.data_file_id 
+    FROM app_mapping_detail_info AMD, 
+         data_file_info DF, 
+         data_type_info DT
+    WHERE AMD.data_file_id = DF.data_file_id
+      AND DF.data_type_id = DT.data_type_id
+      AND AMD.app_map_detail_state <> 'D' 
+      AND AMD.app_mapping_id = #{appMappingId}
+    ORDER BY DT.data_type_name) B ON A.data_file_id = B.data_file_id JOIN (select @RNUM:=0)R
+    WHERE B.data_file_id IS NULL
+       ]]>
+  </select>
+  <!-- 데이터 파일 리스트(수정) -->
+  <select id="fileModify" parameterType="appMappingInfoVO" resultMap="dataFileInfoMap">
+  <![CDATA[
+  SELECT @RNUM := @RNUM + 1 AS rownum,
+       A.data_file_id,
+       A.data_file_name,
+       A.data_file_content,
+       A.data_file_state,
+       DATE_FORMAT(A.data_file_sdate, '%Y-%m-%d') AS data_file_sdate,
+       A.storage_name 
+  FROM(
+      SELECT FILE.data_file_id,
+           FILE.data_file_name,
+           FILE.data_file_content,
+           FILE.data_file_state,
+           DATE_FORMAT(FILE.data_file_sdate, '%Y-%m-%d') AS data_file_sdate,
+           STORAGE.storage_name
+    FROM data_file_info FILE, data_storage_info STORAGE
+    WHERE FILE.data_file_state = 'Y'
+      AND FILE.storage_id = STORAGE.storage_id
+      AND FILE.data_type_id = #{dataTypeId}
+      AND FILE.data_file_name LIKE CONCAT('%',#{searchDataFileName},'%')) A LEFT JOIN
+  
+    (
+      SELECT DF.data_file_name, 
+           DT.data_type_name,
+           DF.data_file_id 
+    FROM app_mapping_detail_info AMD, 
+         data_file_info DF, 
+         data_type_info DT
+    WHERE AMD.data_file_id = DF.data_file_id
+      AND DF.data_type_id = DT.data_type_id
+      AND AMD.app_map_detail_state <> 'D' 
+      AND AMD.app_mapping_id = #{appMappingId}
+    ORDER BY DT.data_type_name) B ON A.data_file_id = B.data_file_id JOIN (select @RNUM:=0)R
+    WHERE B.data_file_id IS NULL
+    ]]>
+  </select>
+  <!-- 파일 상세 정보 -->
+  <select id="fileDetail" parameterType="appMappingInfoVO" resultMap="dataFileInfoMap"> SELECT data_file_name, data_file_content, data_file_state, DATE_FORMAT(data_file_sdate, '%Y-%m-%d') AS data_file_sdate, data_file_store FROM data_file_info WHERE data_file_id = #{dataFileId}
+  </select>
+  <!-- 데이터 파일 버전 리스트 -->
+  <select id="verInFile" parameterType="appMappingInfoVO" resultMap="dataVerInfoMap">
+  <![CDATA[
+  SELECT A.file_ver_id, 
+         A.file_ver_name, 
+         A.file_ver_rank, 
+         DATE_FORMAT(A.file_ver_sdate, '%Y-%m-%d') AS file_ver_sdate,
+         A.etc, 
+         A.data_file_id, 
+         A.data_file_name,
+         'E6E6FA' AS color,
+         'Y' AS state
+  FROM(       
+    SELECT FV.file_ver_id, 
+           FV.file_ver_name, 
+           FV.file_ver_rank,
+           DATE_FORMAT(FV.file_ver_sdate, '%Y-%m-%d') AS file_ver_sdate, 
+           FV.etc, 
+           FV.data_file_id, 
+           DF.data_file_name
+    FROM file_version_info FV, 
+         data_file_info DF
+    WHERE FV.data_file_id = DF.data_file_id
+      AND DF.data_file_id = #{dataFileId}
+      AND FV.file_ver_state = 'Y'
+      AND FV.file_ver_name LIKE CONCAT('%',#{searchFileVerName},'%')) A LEFT JOIN 
+    (
+    SELECT FV.file_ver_id, 
+           FV.file_ver_name, 
+           FV.file_ver_rank, 
+           DATE_FORMAT(FV.file_ver_sdate, '%Y-%m-%d') AS file_ver_sdate,
+           FV.etc, 
+           FV.data_file_id, 
+           DF.data_file_name
+    FROM file_version_info FV, 
+         data_file_info DF,
+         app_mapping_detail_info AMD,
+         app_mapping_info AM,
+         app_file_detail_info AFD
+    WHERE FV.data_file_id = DF.data_file_id
+      AND DF.data_file_id = AMD.data_file_id
+      AND AMD.app_mapping_id = AM.app_mapping_id
+      AND AMD.app_map_detail_id = AFD.app_map_detail_id
+      AND FV.file_ver_id = AFD.file_ver_id
+      AND AFD.app_file_de_state <> 'D'
+      AND AM.app_mapping_id = #{appMappingId}
+      AND DF.data_file_id = #{dataFileId}) B ON A.file_ver_id = B.file_ver_id
+  WHERE B.file_ver_id IS NOT NULL
+  
+  UNION
+  
+  SELECT A.file_ver_id, 
+         A.file_ver_name, 
+         A.file_ver_rank, 
+         DATE_FORMAT( A.file_ver_sdate, '%Y-%m-%d') AS file_ver_sdate,
+         A.etc, 
+         A.data_file_id, 
+         A.data_file_name,
+         '#FFFFFF' AS color,
+         'N' AS state
+  FROM(       
+    SELECT FV.file_ver_id, 
+           FV.file_ver_name, 
+           FV.file_ver_rank, 
+           DATE_FORMAT(FV.file_ver_sdate, '%Y-%m-%d') AS file_ver_sdate,
+           FV.etc, 
+           FV.data_file_id, 
+           DF.data_file_name
+    FROM file_version_info FV, 
+         data_file_info DF
+    WHERE FV.data_file_id = DF.data_file_id
+      AND DF.data_file_id = #{dataFileId}
+      AND FV.file_ver_state = 'Y'
+      AND FV.file_ver_name LIKE CONCAT('%',#{searchFileVerName},'%')) A LEFT JOIN 
+    (
+    SELECT FV.file_ver_id, 
+           FV.file_ver_name, 
+           FV.file_ver_rank, 
+           DATE_FORMAT(FV.file_ver_sdate, '%Y-%m-%d') AS file_ver_sdate,
+           FV.etc, 
+           FV.data_file_id, 
+           DF.data_file_name
+    FROM file_version_info FV, 
+         data_file_info DF,
+         app_mapping_detail_info AMD,
+         app_mapping_info AM,
+         app_file_detail_info AFD
+    WHERE FV.data_file_id = DF.data_file_id
+      AND DF.data_file_id = AMD.data_file_id
+      AND AMD.app_mapping_id = AM.app_mapping_id
+      AND AMD.app_map_detail_id = AFD.app_map_detail_id
+      AND FV.file_ver_id = AFD.file_ver_id
+      AND AFD.app_file_de_state <> 'D'
+      AND AM.app_mapping_id = #{appMappingId}
+      AND DF.data_file_id = #{dataFileId}) B ON A.file_ver_id = B.file_ver_id
+  WHERE B.file_ver_id IS NULL
+  ]]>
+  </select>
+  <!-- 버전 상세 정보 -->
+  <select id="verDetail" parameterType="appMappingInfoVO" resultType="appMappingInfoVO">
+  <![CDATA[
+  SELECT @RNUM := @RNUM + 1 AS rownum, 
+       DF.file_name,
+       DF.file_size,
+       (CASE DF.file_state WHEN 'Y' THEN '사용' WHEN 'N' THEN '미사용' END) AS file_state, 
+       DATE_FORMAT(DF.file_sdate, '%Y-%m-%d') AS file_sdate,
+       DF.file_update
+  FROM data_file_list_info DF, (select @RNUM:=0)R
+  WHERE DF.file_state <> 'D'
+    AND DF.file_ver_id = #{fileVerId}
+  ]]>
+  </select>
+  <!-- 매핑 정보 -->
+  <select id="mappingDetail" parameterType="String" resultMap="appMappingInfoMap"> 
+ <![CDATA[
+         SELECT AM.app_mapping_id,
+         AM.app_mapping_name, 
+         AM.app_mapping_content, 
+         AM.app_mapping_state, 
+         AM.app_mapping_sdate,
+         AM.app_id as appInfoSeq, 
+         AI.app_name,
+		AMSI.app_map_service_id as appMapServiceId,
+        AMSI.app_ver_id as appVerId
+  FROM app_mapping_info AM, app_info AI, app_mapping_service_info AMSI
+  WHERE AM.app_id = AI.app_id 
+  AND AM.app_mapping_id = AMSI.app_mapping_id
+  AND AM.app_mapping_id = #{appMappingId}
+  ]]>
+  </select>
+  <!-- 매핑 상세정보 리스트 -->
+  <select id="appMappingDetailInfoList" parameterType="String" resultType="appMappingInfoVO"> 
+  SELECT  AVI.app_ver_id AS appVerId, 
+  		  AVI.app_id AS appInfoSeq,
+          AVI.app_ver_name AS appVerName, 
+          AVI.app_ver_content AS appVerContent, 
+          AVI.app_ver_state as appVerState 
+  FROM    app_mapping_service_info AMSI, app_version_info AVI 
+  WHERE   AMSI.app_ver_id = AVI.app_ver_id 
+  AND     AMSI.app_mapping_id = #{appMappingId};
+  </select>
+  <!-- SELECT AMDI.app_map_detail_id AS appMapDetailId, AMDI.app_map_detail_state AS appMapDetailState, AMDI.app_map_detail_sdate AS appMapDetailSdate, AMDI.app_map_service_id appMapServiceId, AMDI.app_ver_id AS appVerId, AMDI.app_id AS appInfoSeq, AMDI.app_mapping_id AS appMappingId, AMDI.data_file_id AS dataFileId, AVI.app_ver_name AS appVerName, AVI.app_ver_content AS appVerContent, AVI.app_ver_state AS appVerState FROM app_mapping_detail_info AMDI, app_version_info AVI WHERE AMDI.app_mapping_id = #{appMappingId} AND AMDI.app_ver_id = AVI.app_ver_id -->
+  <!-- 등록된 타입별 파일 정보 -->
+  <select id="typeAndFile" parameterType="String" resultType="appMappingInfoVO">
+  <![CDATA[
+    SELECT DF.data_file_name AS dataFileName, 
+           DT.data_type_name AS dataTypeName,
+           DF.data_file_id AS dataFileId,
+           AMI.app_mapping_name AS appMappingName,
+   	       AVI.app_ver_name AS appVerName,
+           AI.app_name AS appName
+    FROM app_mapping_info AMI,
+         app_version_info AVI,
+         app_mapping_detail_info AMD, 
+         data_file_info DF, 
+         data_type_info DT,
+         app_info AI
+    WHERE AMD.data_file_id = DF.data_file_id
+          AND DF.data_type_id = DT.data_type_id
+          AND AMD.app_mapping_id = #{appMappingId}
+          AND AMI.app_mapping_id = AMD.app_mapping_id
+          AND AVI.app_ver_id = AMD.app_ver_id
+          AND AI.app_id = AMD.app_id
+          AND AMD.app_map_detail_state <> 'D'
+    ORDER BY DT.data_type_name
+  ]]>
+  </select>
+  <!-- 등록된 버전 타입별 파일 정보 -->
+  <select id="verTypeAndFile" parameterType="String" resultType="appMappingInfoVO">
+  <![CDATA[
+    SELECT DF.data_file_name AS dataFileName, 
+         DT.data_type_name AS dataTypeName,
+         DF.data_file_id AS dataFileId,
+         AMI.app_mapping_name AS appMappingName,
+   	     AVI.app_ver_name AS appVerName,
+         AI.app_name AS appName
+    FROM app_mapping_info AMI,
+         app_version_info AVI,
+         app_mapping_detail_info AMD, 
+         data_file_info DF, 
+         data_type_info DT,
+         app_info AI
+    WHERE AMD.data_file_id = DF.data_file_id
+        AND DF.data_type_id = DT.data_type_id
+        AND AMD.app_mapping_id = #{appMappingId}
+        AND AMD.app_ver_id = #{appVerId}
+        AND AMI.app_mapping_id = AMD.app_mapping_id
+        AND AVI.app_ver_id = AMD.app_ver_id
+        AND AI.app_id = AMD.app_id
+        AND AMD.app_map_detail_state <> 'D'
+    ORDER BY DT.data_type_name
+  ]]>
+  </select>
+  <!-- rowSpan -->
+  <select id="rowSpan" parameterType="String" resultType="java.util.Map">
+  <![CDATA[
+  SELECT COUNT(*) rowSpan, data_type_name AS dataTypeName
+  FROM(
+    SELECT DF.data_file_name, 
+         DY.data_type_name 
+    FROM app_mapping_detail_info AMD, 
+       data_file_info DF, 
+       data_type_info DY
+    WHERE AMD.data_file_id = DF.data_file_id
+        AND DF.data_type_id = DY.data_type_id
+        AND AMD.app_mapping_id = #{appMappingId}
+        AND AMD.app_ver_id = #{appVerId}
+        AND AMD.app_map_detail_state <> 'D')A
+  GROUP BY A.data_type_name
+  ]]>
+  </select>
+  <!-- 데이터 매핑 정보 수정 -->
+  <update id="mappingUpdate" parameterType="appMappingInfoVO"> UPDATE app_mapping_info SET app_mapping_state = #{appMappingState}, app_mapping_content = #{appMappingContent} WHERE app_mapping_id = #{appMappingId}
+  </update>
+  <!-- 등록여부확인 -->
+  <select id="confirm" parameterType="appMappingInfoVO" resultType="java.lang.Integer"> SELECT COUNT(*) FROM app_mapping_detail_info WHERE app_mapping_id = #{appMappingId} AND data_file_id = #{dataFileId} AND app_map_detail_state = 'Y'
+  </select>
+  <!-- 매핑 데이터 수정 -->
+  <update id="mappingDetailDel" parameterType="appMappingInfoVO"> UPDATE app_mapping_detail_info SET app_map_detail_state = 'D' WHERE app_mapping_id = #{appMappingId} AND data_file_id = #{dataFileId}
+  </update>
+  <update id="fileDetailDel" parameterType="appMappingInfoVO"> UPDATE app_file_detail_info SET app_file_de_state = 'D' WHERE app_mapping_id = #{appMappingId} AND data_file_id = #{dataFileId}
+  </update>
+  <!-- 매핑 데이터 삭제 -->
+  <update id="mappingDetailDelete" parameterType="String"> UPDATE app_mapping_detail_info SET app_map_detail_state = 'D' WHERE app_mapping_id = #{appMappingId}
+  </update>
+  <update id="fileDetailDelete" parameterType="String"> UPDATE app_file_detail_info SET app_file_de_state = 'D' WHERE app_mapping_id = #{appMappingId}
+  </update>
+  <update id="mappingDelete" parameterType="String"> UPDATE app_mapping_info SET app_mapping_state = 'D' WHERE app_mapping_id = #{appMappingId}
+  </update>
+</mapper>

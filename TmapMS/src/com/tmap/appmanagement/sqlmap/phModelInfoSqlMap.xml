@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.phModelInfoSqlMap">
+
+<!-- 단말모델정보 리스트 수 -->
+<select id="countPhModelInfoList" parameterType="com.tmap.appmanagement.vo.PhModelInfoListVO" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT count(*) 
+	FROM phone_info ph, os_ver_info os, phone_model_info mo 
+	WHERE ph.ph_name LIKE CONCAT('%',#{phName},'%')
+	  AND mo.os_ver_id = os.os_ver_id
+	  AND mo.ph_id = ph.ph_id
+	  AND mo.ph_model_state <> 'D'
+	]]>  
+</select>
+
+<!-- 단말모델정보 리스트 -->
+<select id="phModelInfoList" parameterType="com.tmap.appmanagement.vo.PhModelInfoListVO" resultType="com.tmap.appmanagement.vo.PhModelInfoListVO">
+	<![CDATA[
+	SELECT mo.ph_model_id AS phModelInfoSeq,
+		   mo.ph_model_name AS phModelInfoName,	 
+		   mo.ph_model_state AS phModelState, 
+		   os.os_ver_name AS osVerName,
+		   ph.ph_name AS phName, 
+		   DATE_FORMAT(os.os_ver_sdate, '%Y-%m-%d') AS osVerStoreDate, 
+		   DATE_FORMAT(ph.ph_sdate, '%Y-%m-%d') AS phStoreDate, 
+		   DATE_FORMAT(mo.ph_model_sdate, '%Y-%m-%d') AS phModelStoreDate, 
+		   os.os_ver_content AS osVerContent, 
+		   ph.ph_content AS phContent
+	FROM phone_info ph, os_ver_info os, phone_model_info mo
+	WHERE ph.ph_name LIKE CONCAT('%',#{phName},'%')
+	  AND ph.ph_made LIKE CONCAT('%',#{phMade},'%')
+	  AND ph.ph_division LIKE CONCAT('%',#{phDivision},'%')
+	  AND mo.os_ver_id = os.os_ver_id
+	  AND mo.ph_id = ph.ph_id
+	  AND mo.ph_model_state <> 'D'
+	ORDER BY os.os_ver_name DESC
+	]]>    		   
+</select>
+
+<!-- 단말모델정보 리스트 -->
+<select id="phModelNameList" parameterType="com.tmap.appmanagement.vo.PhModelInfoListVO" resultType="com.tmap.appmanagement.vo.PhModelInfoListVO">
+	 <![CDATA[
+	 SELECT mo.ph_model_name AS phModelInfoName,	 
+	   ph.ph_name AS phName, 
+	   ph.ph_made AS phMade
+	FROM phone_info ph, phone_model_info mo, os_ver_info os
+	WHERE mo.ph_id = ph.ph_id
+	  AND mo.ph_model_state <> 'D'
+	  AND ph.ph_made LIKE CONCAT('%',#{phMade},'%')
+	GROUP BY ph.ph_name  		
+	]]>    
+</select>
+  
+<!-- 단말모델정보 수정 -->
+<update id="phModelChangeState" parameterType="com.tmap.appmanagement.vo.PhModelInfoListVO">
+	UPDATE phone_model_info 
+	SET ph_model_state = #{phModelState}
+	WHERE ph_model_id = #{phModelInfoSeq}
+</update>
+
+<!-- 단말모델정보 삭제 -->
+<delete id="phModelDelete" parameterType="com.tmap.appmanagement.vo.PhModelInfoListVO">
+	DELETE FROM phone_model_info WHERE ph_model_id = #{phModelInfoSeq}
+</delete>
+<!-- 단말모델 상세 정보 -->
+<select id="phModelInfoDetail" parameterType="com.tmap.appmanagement.vo.PhModelInfoListVO" resultType="com.tmap.appmanagement.vo.PhModelInfoListVO">
+	SELECT mo.ph_model_id AS phModelInfoSeq,
+			   mo.ph_model_name AS phModelInfoName,	 
+			   mo.ph_model_state AS phModelState, 
+			   os.os_ver_name AS osVerName,
+			   ph.ph_name AS phName, 
+			   ph.ph_made AS phMade,
+			   mo.ph_model_sdate AS phModelStoreDate, 
+	       	   mo.ph_model_name AS phModelName,
+			   os.os_ver_content AS osVerContent, 
+			   ph.ph_content AS phContent,
+			   ph.ph_division AS phDivision
+	FROM phone_info ph, os_ver_info os, phone_model_info mo
+	WHERE mo.os_ver_id = os.os_ver_id
+	  AND mo.ph_id = ph.ph_id
+	  AND mo.ph_model_id = #{phModelInfoSeq}
+	ORDER BY ph.ph_name DESC
+</select>
+
+</mapper>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.historySqlMap">
+
+<!-- 메뉴리스트 resultMap -->
+<resultMap id="menuListMap" type="com.tmap.sitemanagement.vo.MenuInfoListVO">
+    <result property="menuId"         	column="menu_id"        javaType="java.lang.String" />
+    <result property="hMenuId"       	column="menu_hi_id"   	javaType="java.lang.String" />
+    <result property="menuName"     	column="menu_name"    	javaType="java.lang.String" />
+    <result property="etc"   			column="etc"  			javaType="java.lang.String" />
+    <result property="menuLevel"      	column="menu_level"    	javaType="java.lang.String" />
+    <result property="useFlag"       	column="menu_state"  	javaType="java.lang.String" />
+    <result property="menuUrl"       	column="menu_url" 		javaType="java.lang.String" />
+    <result property="menuOrder"     	column="menu_order"		javaType="java.lang.String" />
+</resultMap>
+
+<!-- 공통코드 resultMap -->
+<resultMap id="codeListMap" type="com.tmap.systemmanagement.vo.ComCodeInfoListVO">
+    <result property="comId"		column="code_id"	javaType="java.lang.String" />
+    <result property="comCode"		column="code"		javaType="java.lang.String" />
+</resultMap>
+
+<!-- 메뉴리스트 -->
+<select id="menuList" resultMap="menuListMap">
+	SELECT *
+	FROM menu_info
+	WHERE menu_level=2
+	  AND menu_state = 'Y'
+	ORDER BY menu_id ASC, menu_hi_id ASC
+</select>
+
+<!-- 사용자리스트 -->
+<!-- <select id="userList" resultMap="userListMap">
+	SELECT *
+	FROM user_info
+	WHERE user_state = 'Y'
+	ORDER BY user_id
+</select> -->
+
+<!-- 공통코드 -->
+<select id="codeList" resultMap="codeListMap">
+	SELECT code_id, 
+		   code 
+	FROM comcode_info 
+	WHERE code_upcode = 'HISTTYPE' 
+	  AND code_state = 'Y'
+</select>
+
+<!-- 히스토리 리스트 수 -->
+<select id="countHistoryInfoList" parameterType="com.tmap.sitemanagement.vo.HistoryInfoListVO" resultType="java.lang.Integer">
+	SELECT count(*) 
+	FROM history_info 
+	WHERE menu_id LIKE CONCAT('%',#{whereMENUID},'%') 
+	  AND modyfi_id LIKE CONCAT('%',#{whereMOFIDYID},'%')
+	  AND event_type LIKE CONCAT('%',#{whereEVENTTYPE},'%')
+	  AND ip LIKE CONCAT('%',#{whereIP},'%')
+	  AND CONVERT(DATE_FORMAT(modyfi_date, '%Y%m%d'), UNSIGNED) 
+      		BETWEEN CONVERT(DATE_FORMAT(#{whereMODIFYDATEFR},'%Y%m%d'), UNSIGNED) 
+      		AND CONVERT(DATE_FORMAT(#{whereMODIFYDATETO},'%Y%m%d'), UNSIGNED)
+	  AND history_state = 'Y'
+</select>
+
+<!-- 히스토리 리스트 -->
+<select id="historyInfoList" parameterType="com.tmap.sitemanagement.vo.HistoryInfoListVO" resultType="com.tmap.sitemanagement.vo.HistoryInfoListVO">
+	SELECT @RNUM := @RNUM + 1 AS rownum,
+       	   history.menu_id,
+       	   history.modyfi_id,
+       	   history.modyfi_date,
+       	   history.history_data,
+       	   history.ip,
+       	   history.event_type,
+       	   history.history_state
+	FROM history_info history, (SELECT @RNUM:=0)R 
+	WHERE history.menu_id LIKE CONCAT('%',#{whereMENUID},'%')
+	  AND history.modyfi_id LIKE CONCAT('%',#{whereMOFIDYID},'%')
+	  AND history.event_type LIKE CONCAT('%',#{whereEVENTTYPE},'%')
+	  AND history.ip LIKE CONCAT('%',#{whereIP},'%')
+	  AND CONVERT(DATE_FORMAT(history.modyfi_date, '%Y%m%d'), UNSIGNED) 
+ 		  BETWEEN CONVERT(DATE_FORMAT(#{whereMODIFYDATEFR},'%Y%m%d'), UNSIGNED) 
+ 			  AND CONVERT(DATE_FORMAT(#{whereMODIFYDATETO},'%Y%m%d'), UNSIGNED)
+	  AND history.history_state = 'Y'
+	ORDER BY history.modyfi_date DESC 			  		   
+</select>
+
+<insert id="insert" parameterType="historyInfoListVO">
+	INSERT INTO history_info (
+		menu_id, modyfi_id, event_type, ip, history_data, modyfi_date, history_state
+	) VALUES (
+		  #{menu_id}
+		, #{modyfi_id}
+		, #{event_type}
+		, #{ip}
+		, #{history_data}
+		, now()		
+		, 'Y'
+	)
+</insert>
+</mapper>

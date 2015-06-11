@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.fileVersionSqlMap">
+	<sql id="fileVersionInfo-basic">
+		select file_ver_id AS fileVerId
+			 , file_ver_name AS fileVerName
+			 , file_ver_rank AS fileVerRank
+			 , file_ver_state AS fileVerState
+			 , DATE_FORMAT(file_ver_sdate, '%Y-%m-%d') AS fileVerSdate
+			 , etc AS etc
+			 , data_file_id AS dataFileId
+		  from file_version_info
+	</sql>
+	
+	<select id="fileVersionInfo" parameterType="string" resultType="fileVersionInfoVO">
+		<include refid="fileVersionInfo-basic"/>
+		 where file_ver_id = #{fileVerId}
+		   and file_ver_state in ("Y", "N")
+	</select>
+	
+	<select id="fileVersionInfoList" parameterType="string" resultType="fileVersionInfoVO">
+		<include refid="fileVersionInfo-basic"/>
+		 where data_file_id = #{dataFileId}
+		   and file_ver_state in ("Y", "N")
+	</select>
+	
+	<insert id="fileVersionInfoInsert"  parameterType="fileVersionInfoVO">
+		insert into file_version_info (
+			  file_ver_name
+			, file_ver_rank
+			, file_ver_state
+			, file_ver_sdate
+			, etc
+			, data_file_id
+			)
+			select 
+				  #{fileVerName}
+				, count(file_ver_rank)+1
+				, #{fileVerState}
+				, now()
+				, #{etc}
+				, #{dataFileId}
+			  from file_version_info 
+			 where data_file_id = #{dataFileId}
+			 
+		<selectKey resultType="String" keyProperty="fileVerId">
+		SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	<update id="fileVersionInfoUpdate" parameterType="fileVersionInfoVO">
+		update file_version_info
+		   set file_ver_name = #{fileVerName}
+		     , file_ver_state = #{fileVerState}
+		     , etc = #{etc}
+		 where data_file_id = #{dataFileId}
+		   and file_ver_id = #{fileVerId}
+	</update>
+	
+	<update id="fileVersionInfoDelete" parameterType="string">
+		update file_version_info
+		   set file_ver_state = "D"
+		 where file_ver_id = #{fileVerId}
+	</update>
+</mapper>

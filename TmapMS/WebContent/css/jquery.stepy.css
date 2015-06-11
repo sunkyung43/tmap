@@ -1,0 +1,26 @@
+@CHARSET "UTF-8";
+
+.buttons { float:right; margin:10;}
+.button-back {}
+.button-next, .finish {}
+.button-back, .button-next, .finish {
+	border: 1px solid #C9C4BA; color: #7F0055; cursor: pointer; font: 10px verdana; padding: 3px 10px; text-decoration: none;
+}
+.button-back:hover, .button-next:hover, .finish:hover { border-color: #DFDCD6; color: #B07; }
+
+.step {	border: 1px solid #DDD; clear: left; font: 10px verdana; width: 100%; }
+.step label { color: #444; display: block; font: bold 10px verdana; margin: 10px 0 3px 7px; }
+
+
+.error-image { background: url('../img/error.png') no-repeat right top; }
+
+.stepy-titles { list-style: none; margin: 0; padding: 0; width: 100%; }
+.stepy-titles li { color: #DDD; cursor: pointer; font: bold 18px verdana; float: left; padding: 10px; }
+.stepy-titles li span { font: 11px verdana; display: block; }
+.stepy-titles .current-step { color: #369; cursor: auto; }
+
+/*** Optionaly (jQuery Validate) ***/
+
+.error { background-color: #FAF4F4; }
+
+label.error { background: url('../img/alert.png') no-repeat; color: #DE5130; display: block; float: left; font: 10px verdana; height: 13px; margin: 3px 3px 0 10px; padding-left: 21px; padding-top: 2px; }

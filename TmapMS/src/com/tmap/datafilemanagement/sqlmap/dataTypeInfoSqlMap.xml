@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.dataTypeSqlMap">
+	<select id="dataTypeInfoList" parameterType="dataTypeInfoVO" resultType="dataTypeInfoVO">
+		<include refid="dataTypeInfoList-pageing-start"/>
+		select typeinfo.data_type_id AS dataTypeId
+			 , typeinfo.data_type_name AS dataTypeName
+			 , typeinfo.data_type_content AS dataTypeContent
+			 , typeinfo.data_type_state AS dataTypeState
+			 , DATE_FORMAT(typeinfo.data_type_sdate, '%Y-%m-%d') AS dataTypeSdate
+			 , typeinfo.etc AS etc
+			 , (select count(data_type_id) from data_file_info where data_type_id = typeinfo.data_type_id) AS useCount
+		  from data_type_info typeinfo
+		<!-- <include refid="dataTypeInfoList-searchCondition"/> -->
+		order by typeinfo.data_type_sdate ASC
+		 <include refid="dataTypeInfoList-pageing-end"/> 
+	</select>
+	
+	<select id="countDataTypeInfoList" parameterType="dataTypeInfoVO" resultType="java.lang.Integer">
+		select count(typeinfo.data_type_id)
+		  from data_type_info typeinfo
+		<!-- <include refid="dataTypeInfoList-searchCondition"/> -->
+	</select>
+	
+	<sql id="dataTypeInfoList-searchCondition">
+		<where>
+			<if test="searchDataTypeState.equalsIgnoreCase('ALL')">
+			typeinfo.data_type_state in ('Y', 'N')
+			</if>
+			<if test="!searchDataTypeState.equalsIgnoreCase('ALL')">
+			typeinfo.data_type_state = #{searchDataTypeState}
+			</if>
+			
+			<if test="searchDataTypeName != null and !searchDataTypeName.equalsIgnoreCase('')">
+			and typeinfo.data_type_name like concat(#{searchDataTypeName},'%')
+			</if>
+		</where>
+	</sql>
+	
+	<sql id="dataTypeInfoList-pageing-start">
+	SELECT *
+	FROM (
+	SELECT @NO := @NO + 1 AS ROWNUM, A.*
+	FROM
+	  (
+	</sql>
+	
+	<sql id="dataTypeInfoList-pageing-end">
+	  ) A,
+	  ( SELECT @NO := 0 ) B 
+	) C
+	ORDER BY C.ROWNUM DESC
+	</sql>
+	
+	<select id="dataTypeInfoListForSelectBox" parameterType="dataTypeInfoVO" resultType="dataTypeInfoVO">
+		select data_type_id AS dataTypeId
+			 , data_type_name AS dataTypeName
+		  from data_type_info
+		 where data_type_state = 'Y'
+		order by data_type_name ASC	
+	</select>
+	
+	<select id="dataTypeInfo" parameterType="dataTypeInfoVO" resultType="dataTypeInfoVO">
+		select typeinfo.data_type_id AS dataTypeId
+			 , typeinfo.data_type_name AS dataTypeName
+			 , typeinfo.data_type_content AS dataTypeContent
+			 , typeinfo.data_type_state AS dataTypeState
+			 , DATE_FORMAT(typeinfo.data_type_sdate, '%Y-%m-%d') AS dataTypeSdate
+			 , typeinfo.etc AS etc
+			 , (select count(data_type_id) from data_file_info where data_type_id = typeinfo.data_type_id) AS useCount
+		  from data_type_info typeinfo
+		 where typeinfo.data_type_id = #{dataTypeId}
+	</select>	
+	
+	<update id="dataTypeInfoUpdate" parameterType="dataTypeInfoVO">
+		update data_type_info 
+		   set data_type_name = #{dataTypeName}
+			 , data_type_content = #{dataTypeContent}
+			 , data_type_state = #{dataTypeState}
+			 , etc = #{etc}
+		 where data_type_id = #{dataTypeId}
+	</update>
+	
+	<delete id="dataTypeInfoDelete" parameterType="dataTypeInfoVO">
+		DELETE FROM data_type_info 
+		 where data_type_id = #{dataTypeId}
+		<!--  AND data_type_state = #{dataTypeState} -->
+	</delete>
+	
+	<insert id="dataTypeInfoInsert" parameterType="dataTypeInfoVO">
+		insert into data_type_info (
+			  data_type_name	
+			, data_type_state
+			, data_type_content
+			, etc
+			, data_type_sdate
+		) 
+		values(
+			  #{dataTypeName}
+			, 'Y'
+			, #{dataTypeContent}
+			, #{etc}
+			, sysdate()
+		)
+		<selectKey resultType="String" keyProperty="dataTypeId">
+		SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+</mapper>

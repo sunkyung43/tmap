@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.rmVersionSqlMap">
+
+<!-- 맵 버전 긴급 운영설정 -->
+<select id="searchRmVersion" resultType="com.tmap.systemmanagement.vo.RmVersionVO">
+	<![CDATA[
+	SELECT rmversion_state AS mapVerCheck, 
+		   rmversion_sdate AS mapVerCheckDate,
+		   rmversion_id AS mapVerCheckSeq 
+	FROM rmversion_info
+	WHERE rmversion_state <> 'D'
+	]]> 
+</select>
+
+<update id="rmVersionDelete" parameterType="com.tmap.systemmanagement.vo.RmVersionVO">
+	UPDATE rmversion_info
+	SET rmversion_state = 'D',
+		rmversion_sdate = CURRENT_TIMESTAMP
+	WHERE rmversion_id = #{mapVerCheckSeq}
+</update>
+
+<insert id="rmVersionUpdate" parameterType="com.tmap.systemmanagement.vo.RmVersionVO">
+	INSERT
+	INTO rmversion_info (rmversion_state, rmversion_sdate)
+	VALUES (#{mapVerCheck}, CURRENT_TIMESTAMP)
+</insert>
+
+</mapper>

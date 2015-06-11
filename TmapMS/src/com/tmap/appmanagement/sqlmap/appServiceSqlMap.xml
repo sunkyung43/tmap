@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tmap.appmanagement.sqlmap.appServiceSqlMap">
+
+	<!-- App서비스관리 리스트 출력 resultMap -->
+	<resultMap id="appServiceListMap" type="com.tmap.appmanagement.vo.AppServiceListVO">
+		<result property="rownum" column="ROWNUM" javaType="java.lang.String" />
+		<result property="appInfoServiceSeq" column="upgrade_app_id" javaType="java.lang.String" />
+		<result property="appUpSeq" column="up_app_id" javaType="java.lang.String" />
+		<result property="appUpName" column="up_app_name" javaType="java.lang.String" />
+		<result property="appInfoSeq" column="current_app_id" javaType="java.lang.String" />
+		<result property="appName" column="current_app_name" javaType="java.lang.String" />
+		<result property="appDownUrl" column="upgrade_down_url" javaType="java.lang.String" />
+		<result property="appInfoServiceState" column="upgrade_app_state" javaType="java.lang.String" />
+		<result property="appInfoServiceRemark" column="etc" javaType="java.lang.String" />
+		<result property="appVerId" column="current_app_ver_id" javaType="java.lang.String" />
+		<result property="appVerName" column="current_app_ver_name" javaType="java.lang.String" />
+		<result property="appUpVerId" column="up_app_ver_id" javaType="java.lang.String" />
+		<result property="appUpVerName" column="up_app_ver_name" javaType="java.lang.String" />
+		<result property="upgradeDivision" column="upgrade_type" javaType="java.lang.String" />
+		<result property="introPopup" column="intro_popup" javaType="java.lang.String" />
+		<result property="menuDisplay" column="menu_display" javaType="java.lang.String" />
+		<result property="mapDownload" column="map_download" javaType="java.lang.String" />
+		<result property="upgradeComment" column="upgrade_comment" javaType="java.lang.String" />
+	</resultMap>
+
+	<!-- App 리스트 출력 resultMap -->
+	<resultMap id="appListMap" type="com.tmap.appmanagement.vo.AppInfoListVO">
+		<result property="appInfoSeq" column="app_id" javaType="java.lang.String" />
+		<result property="appName" column="app_name" javaType="java.lang.String" />
+		<result property="appContent" column="app_content" javaType="java.lang.String" />
+		<result property="appMade" column="app_made" javaType="java.lang.String" />
+		<result property="appDownURL" column="app_downurl" javaType="java.lang.String" />
+		<result property="appState" column="app_state" javaType="java.lang.String" />
+		<result property="appStoreDate" column="app_store_date"
+			javaType="java.lang.String" />
+	</resultMap>
+
+
+	<!-- App Ver 리스트 출력 resultMap -->
+	<resultMap id="appVerListMap" type="com.tmap.appmanagement.vo.AppInfoListVO">
+		<result property="appVerId" column="app_ver_id" javaType="java.lang.String" />
+		<result property="appVerName" column="app_ver_name" javaType="java.lang.String" />
+	</resultMap>
+
+	<!-- 현재 App 출력 resultMap -->
+	<resultMap id="currentOsPhListMap" type="com.tmap.appmanagement.vo.AppServiceListVO">
+		<result property="osPhInfoSeq" column="app_model_info_id"
+			javaType="java.lang.String" />
+		<result property="phInfoSeq" column="ph_id" javaType="java.lang.String" />
+		<result property="phName" column="ph_name" javaType="java.lang.String" />
+		<result property="phModelInfoSeq" column="ph_model_id"
+			javaType="java.lang.String" />
+		<result property="phModelName" column="ph_model_name" javaType="java.lang.String" />
+		<result property="osVerInfoSeq" column="os_ver_id" javaType="java.lang.String" />
+		<result property="osVerName" column="os_ver_name" javaType="java.lang.String" />
+	</resultMap>
+
+	<!-- App서비스관리 리스트 수 -->
+	<select id="countAppServiceList" parameterType="com.tmap.appmanagement.vo.AppServiceListVO"
+		resultType="java.lang.Integer">
+		SELECT COUNT(*)
+		FROM upgrade_app_info
+		WHERE upgrade_app_state IN ('Y', 'N')
+	</select>
+
+	<!-- App서비스관리 리스트 출력 -->
+	<select id="appServiceList" parameterType="com.tmap.appmanagement.vo.AppServiceListVO"
+		resultMap="appServiceListMap">
+		SELECT @RNUM := @RNUM +1 AS ROWNUM, A.*
+		FROM upgrade_app_info A, (select @RNUM:=0)R
+		WHERE current_app_name LIKE CONCAT('%',#{appName},'%')
+		AND up_app_name LIKE CONCAT('%',#{appUpName},'%')
+		ORDER BY upgrade_app_sdate DESC, ROWNUM
+	</select>
+
+	<!-- 현재 App 리스트 -->
+	<select id="currentAppList" resultMap="appListMap">
+		SELECT * FROM app_info
+		WHERE app_state = 'Y';
+	</select>
+
+	<!-- 현재 App Ver리스트 -->
+	<select id="currentAppVerList" parameterType="String" resultMap="appVerListMap">
+		SELECT * FROM
+		app_version_info
+		WHERE app_ver_state = 'Y'
+		AND app_id = #{selectCurrentAppSeq}
+		
+	</select>
+
+	<!-- 업데이트 App 리스트 -->
+	<select id="upgradeAppList" resultMap="appListMap">
+		SELECT *
+		FROM app_info
+		WHERE app_state = 'Y'
+	</select>
+
+	<select id="upgradeAppVerList" parameterType="com.tmap.appmanagement.vo.AppServiceListVO" resultMap="appVerListMap">
+		SELECT a.* FROM(SELECT *
+		FROM app_version_info
+		WHERE app_ver_state = 'Y') a
+		LEFT JOIN(SELECT *
+		FROM app_version_info A
+		WHERE app_ver_id IN (SELECT up_app_ver_id
+		FROM upgrade_app_info
+		WHERE current_app_id = #{selectUpgradeAppSeq}
+		AND current_app_ver_id = '1'
+		AND up_app_id = '1')		
+		AND app_ver_state = 'Y'
+		) b
+		ON a.app_ver_id = b.app_ver_id
+		WHERE b.app_ver_id is null
+		AND a.app_id = #{selectUpgradeAppSeq}
+	</select>
+
+
+	<select id="getCurrentOsPhList" parameterType="String"
+		resultMap="currentOsPhListMap">
+		SELECT P.ph_id,
+		P.ph_name,
+		M.ph_model_id,
+		M.ph_model_name,
+		V.os_ver_id,
+		V.os_ver_name
+		FROM app_version_model_info O,
+		app_version_info A,
+		phone_model_info M,
+		os_ver_info V,
+		phone_info P
+		WHERE A.app_ver_id = O.app_ver_id
+		AND O.ph_model_id = M.ph_model_id
+		AND M.os_ver_id = V.os_ver_id
+		AND M.ph_id = P.ph_id
+		AND A.app_ver_id = #{selectAppVerId}
+		AND A.app_ver_state = 'Y'
+		ORDER BY ph_model_id ASC
+	</select>
+
+	<select id="getAppDownUrl" parameterType="String" resultType="String">
+		SELECT app_downurl AS appDownURL FROM app_info WHERE app_id =
+		#{appInfoSeq}
+	</select>
+
+	<insert id="appServiceNew" parameterType="com.tmap.appmanagement.vo.AppServiceListVO">
+		INSERT
+		INTO upgrade_ph_model_info(
+		upgrade_model_sdate,
+		upgrade_type,
+		upgrade_key,
+		ph_model_id)
+		VALUES(
+		now(),
+		#{upgradeType},
+		#{appInfoServiceSeq},
+		#{phModelInfoSeq})
+	</insert>
+
+	<select id="getOsPhList" parameterType="com.tmap.appmanagement.vo.AppServiceListVO"
+		resultType="com.tmap.appmanagement.vo.AppServiceListVO">
+	<![CDATA[
+	SELECT CA.ph_model_id AS phModelInfoSeq, 
+		   'X' AS state, 
+		   'N' AS checkYn, 
+		   '#FFFFFF' AS stateColor 
+	FROM (SELECT AM.* 
+		  FROM app_version_info AI, app_version_model_info AM 
+		  WHERE AI.app_ver_id = AM.app_ver_id 
+		    AND AI.app_ver_id = #{appVerId})CA
+	LEFT JOIN (SELECT AM.* 
+			   FROM app_version_info AI, app_version_model_info AM 
+			   WHERE AI.app_ver_id = AM.app_ver_id 
+			     AND AI.app_ver_id = #{appUpVerId})UA
+	ON CA.ph_model_id = UA.ph_model_id
+	WHERE UA.ph_model_id IS NULL
+
+	UNION
+	
+	SELECT A.ph_model_id AS phModelInfoSeq, 
+		   state, 
+		   checkYn, 
+		   stateColor 
+	FROM (SELECT B.*, 
+				 'A' AS state, 
+				 'Y' AS checkYn, 
+				 '#E6E6FA' AS stateColor
+		  FROM (SELECT CA.*
+	    	    FROM (SELECT AM.* 
+	    	    	  FROM app_version_info AI, app_version_model_info AM 
+	    	    	  WHERE AI.app_ver_id = AM.app_ver_id 
+	    	    	    AND AI.app_ver_id = #{appVerId})CA,
+	         		 (SELECT AM.* 
+	         		  FROM app_version_info AI, app_version_model_info AM 
+	         		  WHERE AI.app_ver_id = AM.app_ver_id 
+	         		    AND AI.app_ver_id = #{appUpVerId})UA
+	    		WHERE CA.ph_model_id = UA.Ph_model_id) B, 
+	    		      (SELECT * 
+	    		       FROM upgrade_ph_model_info 
+	    		       WHERE upgrade_key = #{appInfoServiceSeq}) C
+		  WHERE B.ph_model_id = C.ph_model_id
+		  
+		  UNION
+	
+		  SELECT B.*, 
+		         'N' AS state, 
+		         'N' AS checkYn, 
+		         '#FFFACD' AS stateColor
+		  FROM (SELECT CA.*
+	    		FROM (SELECT AM.* 
+	    			  FROM app_version_info AI, app_version_model_info AM 
+	    			  WHERE AI.app_ver_id = AM.app_ver_id 
+	    			    AND AI.app_ver_id = #{appVerId}) CA,
+	         		 (SELECT AM.* 
+	         		  FROM app_version_info AI, app_version_model_info AM 
+	         		  WHERE AI.app_ver_id = AM.app_ver_id 
+	         		    AND AI.app_ver_id = #{appUpVerId}) UA
+	    		WHERE CA.ph_model_id = UA.Ph_model_id) B
+				LEFT JOIN (SELECT * 
+						   FROM upgrade_ph_model_info 
+						   WHERE upgrade_key = #{appInfoServiceSeq}) C
+				ON B.ph_model_id = C.ph_model_id
+		  		WHERE C.ph_model_id IS NULL) A
+	ORDER BY phModelInfoSeq ASC
+	]]>
+	</select>
+
+	<select id="detail" parameterType="String" resultMap="appServiceListMap">
+		SELECT *
+		FROM upgrade_app_info
+		WHERE upgrade_app_id = #{selectedServiceSeq}
+		AND upgrade_app_state IN ('Y', 'N')
+	</select>
+
+	<select id="getOsPhAllList" parameterType="String"
+		resultType="com.tmap.appmanagement.vo.AppServiceListVO">
+		SELECT A.ph_name AS phName,
+		B.os_ver_name AS osVerName
+		FROM phone_info A, os_ver_info B, phone_model_info C
+		WHERE C.ph_id = A.ph_id
+		AND C.os_ver_id = B.os_ver_id
+		AND C.ph_model_id = #{seq}
+	</select>
+
+	<select id="appServices" parameterType="com.tmap.appmanagement.vo.AppServiceListVO"
+		resultType="com.tmap.appmanagement.vo.AppServiceListVO">
+		SELECT '#E6E6FA' stateColor,
+		'A' state,
+		(SELECT ph_name FROM phone_info WHERE ph_id = P.ph_id) phName,
+		(SELECT os_ver_name FROM os_ver_info WHERE os_ver_id = P.os_ver_id)
+		osVerName,
+		P.ph_model_id AS PHMODELINFOSEQ,
+		O.ph_id AS phInfoSeq,
+		O.os_ver_id AS osVerInfoSeq
+		FROM upgrade_app_info A, upgrade_ph_model_info O, phone_model_info P
+		WHERE A.upgrade_app_id = O.upgrade_app_id
+		AND O.ph_model_id = P.ph_model_id
+		AND O.os_ver_id = P.os_ver_id
+		AND O.ph_id = P.ph_id
+		AND A.current_app_id = #{appInfoSeq}
+		AND A.up_app_id = #{appUpSeq}
+		AND A.upgrade_app_state IN ('Y', 'N')
+	</select>
+
+	<!-- App 서비스 등록 - upgrade_app_info -->
+	<insert id="appInfoInsert" parameterType="com.tmap.appmanagement.vo.AppServiceListVO">
+		INSERT
+		INTO upgrade_app_info(current_app_id,
+		current_app_name,
+		current_app_ver_id,
+		current_app_ver_name,
+		up_app_id,
+		up_app_name,
+		up_app_ver_id,
+		up_app_ver_name,
+		upgrade_type,
+		intro_popup,
+		menu_display,
+		map_download,
+		upgrade_comment,
+		upgrade_down_url,
+		upgrade_app_state,
+		upgrade_app_sdate,
+		etc)
+		VALUES (
+		#{appInfoSeq},
+		#{appName},
+		#{appVerId},
+		#{appVerName},
+		#{appUpSeq},
+		#{appUpName},
+		#{appUpVerId},
+		#{appUpVerName},
+		#{upgradeDivision},
+		#{introPopup},
+		#{menuDisplay},
+		#{mapDownload},
+		#{upgradeComment},
+		#{appDownUrl},
+		#{appInfoServiceState},
+		now(),
+		#{appInfoServiceRemark})
+	</insert>
+
+	<!-- upgrade_app_info테이블에 최근등록한 upgrade_app_id -->
+	<select id="appInfoServiceSeq" resultType="String">
+		SELECT MAX(upgrade_app_id) FROM upgrade_app_info
+	</select>
+
+	<update id="appServiceEdit" parameterType="com.tmap.appmanagement.vo.AppServiceListVO">
+		UPDATE upgrade_app_info
+		SET 
+		upgrade_type = #{upgradeDivision},
+		intro_popup = #{introPopup},
+		menu_display = #{menuDisplay},
+		map_download = #{mapDownload},
+		upgrade_comment = #{upgradeComment} ,
+		etc = #{appInfoServiceRemark},
+		upgrade_app_state = #{appInfoServiceState},
+		upgrade_down_url = #{appDownUrl}
+		WHERE upgrade_app_id = #{appInfoServiceSeq}
+	</update>
+
+	<update id="appServiceDelete" parameterType="com.tmap.appmanagement.vo.AppServiceListVO">
+		DELETE FROM upgrade_ph_model_info
+		WHERE upgrade_type = 'A' 
+		AND upgrade_key = #{appInfoServiceSeq}
+	</update>
+
+	<update id="delete" parameterType="com.tmap.appmanagement.vo.AppServiceListVO">
+		DELETE FROM upgrade_app_info
+		WHERE upgrade_app_id = #{appInfoServiceSeq}		
+	</update>
+</mapper>

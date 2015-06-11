@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="comTypeInfoSqlMap">
+
+<!-- 통신방식 정보 resultMap -->
+<resultMap id="comTypeInfoMap" type="comTypeInfoVO">
+    <result property="rownum"		  column="ROWNUM"			javaType="java.lang.String" />
+    <result property="comTypeId"	  column="com_type_id"	  	javaType="java.lang.String" />
+    <result property="comTypeName"	  column="com_type_name"	javaType="java.lang.String" />
+    <result property="comTypeContent" column="com_type_content" javaType="java.lang.String" />
+    <result property="comTypeState"	  column="com_type_state"	javaType="java.lang.String" />
+    <result property="comTypeSdate"	  column="com_type_sdate"	javaType="java.lang.String" />
+</resultMap>
+
+<!-- 통신방식 정보 리스트 수 -->
+<select id="countComTypeInfoList" parameterType="comTypeInfoVO" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(*)
+	FROM com_type_info
+	WHERE com_type_state <> 'D'
+	  AND com_type_name LIKE CONCAT('%',#{comTypeName},'%')
+	]]>
+</select>
+
+<!-- 통신방식 정보 리스트 -->
+<select id="comTypeInfoList" parameterType="comTypeInfoVO" resultMap="comTypeInfoMap">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum, 
+		   ST.com_type_id, 
+		   ST.com_type_name, 
+		   ST.com_type_content, 
+		   ST.com_type_state, 
+		   ST.com_type_sdate 
+	FROM com_type_info ST, (select @RNUM:=0)R
+	WHERE com_type_state <> 'D'
+	  AND com_type_name LIKE CONCAT('%',#{comTypeName},'%')
+	ORDER BY ST.com_type_sdate DESC  
+	]]>
+</select>
+
+<!-- 통신방식명 중복체크 -->
+<select id="checkName" parameterType="String" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(com_type_name)
+	FROM com_type_info
+	WHERE com_type_name = #{checkName} 
+	  AND com_type_state <> 'D'
+  	]]>
+</select>
+
+<!-- 통신방식 등록 -->
+<insert id="comTypeInsert" parameterType="comTypeInfoVO">
+	INSERT
+	INTO com_type_info (com_type_name, 
+						com_type_content, 
+						com_type_state, 
+						com_type_sdate)
+	VALUES (#{comTypeName}, 
+			#{comTypeContent}, 
+			#{comTypeState}, 
+			now())						   
+</insert>
+
+<!-- ds_com_state 등록 -->
+<insert id="dsComInfoInsert" parameterType="comTypeInfoVO">
+	INSERT
+	INTO ds_com_state (com_type_id,
+					   com_type_name,
+					   com_state)
+	VALUES (#{comTypeId},
+			#{comTypeName},
+			'Y')					   
+</insert>
+
+
+<!-- comTypeId --> 
+<select id="comTypeId" resultType="java.lang.Integer" parameterType="String">
+	<![CDATA[
+	SELECT com_type_id AS comTypeId
+	FROM com_type_info
+	WHERE com_type_name = #{comTypeName}
+	  AND com_type_state <> 'D'
+	]]>  
+</select>
+
+<!-- 통신방식 Detail -->
+<select id="comTypeInfo" parameterType="String" resultMap="comTypeInfoMap">
+	<![CDATA[
+	SELECT com_type_name, 
+		   com_type_content, 
+		   com_type_state, 
+		   DATE_FORMAT(com_type_sdate, '%Y-%m-%d') AS com_type_sdate,
+		   com_type_id
+	FROM com_type_info
+	WHERE com_type_id = #{comTypeId}
+	  AND com_type_state <> 'D'
+	]]>  		   
+</select>
+
+<!-- 통신방식 수정 -->
+<update id="comTypeUpdate" parameterType="comTypeInfoVO">
+	UPDATE com_type_info
+	SET com_type_content = #{comTypeContent}, 
+		com_type_state = #{comTypeState}
+	WHERE com_type_id = #{comTypeId}						   
+</update>
+
+<!-- 통신방식 삭제 -->
+<update id="comTypeDelete" parameterType="String">
+	UPDATE com_type_info
+	SET com_type_state = 'D'
+	WHERE com_type_id = #{comTypeId}					   
+</update>
+
+</mapper>

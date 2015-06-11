@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.dataFileListSqlMap">
+	<select id="dataFileListInfoList" parameterType="dataFileListInfoVO" resultType="dataFileListInfoVO">
+		select file_list_id AS fileListId
+			 , file_name AS fileName
+			 , file_size AS fileSize
+			 , file_md5 AS fileMd5
+			 , file_update AS fileUpdate
+			 , file_state AS fileSate
+			 , DATE_FORMAT(file_sdate, '%Y-%m-%d') AS fileSdate
+			 , file_ver_id AS fileVerId
+			 , data_file_id AS dataFileId
+		 from data_file_list_info
+		where file_ver_id = #{fileVerId}
+		  and file_state = 'Y'
+	</select>
+	
+	<select id="dataFileListInfo" parameterType="String" resultType="dataFileListInfoVO">
+		select file_list_id AS fileListId
+			 , file_name AS fileName
+			 , file_size AS fileSize
+			 , file_md5 AS fileMd5
+			 , file_update AS fileUpdate
+			 , file_state AS fileSate
+			 , DATE_FORMAT(file_sdate, '%Y-%m-%d') AS fileSdate
+			 , file_ver_id AS fileVerId
+			 , data_file_id AS dataFileId
+		 from data_file_list_info
+		where file_list_id = #{fileListId}
+	</select>
+	
+	<insert id="fileInfoInsert" parameterType="dataFileListInfoVO">
+		insert into data_file_list_info (file_name, file_size, file_md5, file_update, file_state, file_sdate, file_ver_id, data_file_id)
+		values(
+			  #{fileName}
+			, #{fileSize}
+			, #{fileMd5}
+			, #{fileUpdate}
+			, 'Y'
+			, now()
+			, #{fileVerId}
+			, #{dataFileId}
+		)
+		<selectKey resultType="String" keyProperty="fileListId">
+		SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+	
+	<update id="fileInfoDelete" parameterType="dataFileListInfoVO">
+		update data_file_list_info
+		   set file_state = 'D'
+		 where file_list_id IN 
+		 <foreach collection="fileListIds" item="id" index="index" open="(" separator="," close=")">
+		 	#{id}
+		 </foreach>
+		   and file_ver_id = #{fileVerId}
+		   and data_file_id = #{dataFileId}
+	</update>
+	
+	<update id="fileInfoRequisiteUpdate" parameterType="dataFileListInfoVO">
+		UPDATE data_file_list_info
+		   SET file_update = #{fileUpdate}
+		 WHERE file_list_id IN 
+		 <foreach collection="fileListIds" item="id" index="index" open="(" separator="," close=")">
+		 	#{id}
+		 </foreach>
+		   AND file_ver_id = #{fileVerId}
+		   AND data_file_id = #{dataFileId}
+	</update>
+</mapper>

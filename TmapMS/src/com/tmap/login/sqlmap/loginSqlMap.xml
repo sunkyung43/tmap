@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.loginSqlMap">
+	<select id="userInfo" parameterType="string" resultType="userInfoVO">
+		select user_id AS userId
+			 , user_pass AS userPass
+			 , user_name AS userName
+			 , user_tel AS userTel
+			 , user_devision AS userDevision
+			 , user_state AS userState
+			 , user_sdate AS userSdate
+			 , company_id AS companyId
+			 , authority_menu_id AS authorityMenuId
+		  from user_info
+		 where user_id = #{userId}
+	</select>
+</mapper>

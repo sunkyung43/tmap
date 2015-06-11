@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.menuSqlMap">
+	<select id="userMenuList" parameterType="string" resultType="menuInfoVO">
+		select m_info.menu_id AS menuId 
+			 , m_info.menu_hi_id AS menuHiId
+			 , m_info.menu_name AS menuName
+			 , m_info.menu_level AS menuLevel
+			 , m_info.menu_state AS menuState
+			 <!-- , CONCAT('/TmapMS/jsp/', m_info.menu_url, '.do') AS menuUrl -->
+			 , m_info.menu_url AS menuUrl
+			 , m_info.menu_order AS menuOrder
+			 , m_info.etc AS etc
+		  from authority_menu_info a_info
+		     , menu_info m_info
+		where a_info.authority_menu_id = #{authorityMenuId}
+		  and a_info.menu_id = m_info.menu_id
+		  and m_info.menu_state = "Y"
+		order by m_info.menu_level ASC, m_info.menu_order ASC
+	</select>
+</mapper>

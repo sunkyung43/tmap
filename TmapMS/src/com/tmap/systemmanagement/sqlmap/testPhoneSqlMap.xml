@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.testPhoneSqlMap">
+
+<!-- 테스트폰 리스트 수 -->
+<select id="countTestPhoneInfoList" parameterType="com.tmap.systemmanagement.vo.TestPhoneInfoListVO" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT count(*) 
+	FROM test_phone_info 
+	WHERE test_phone_number LIKE CONCAT('%',#{testPhoneNumber},'%')
+	  AND user_name LIKE CONCAT('%',#{userName},'%')
+	  AND test_phone_state <> 'D'
+	]]>    
+</select>
+
+<!-- 테스트폰 리스트 -->
+<select id="testPhoneInfoList" parameterType="com.tmap.systemmanagement.vo.TestPhoneInfoListVO" resultType="com.tmap.systemmanagement.vo.TestPhoneInfoListVO">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum,
+		   testPhone.test_phone_id AS testPhoneSeq,
+		   testPhone.test_phone_number AS testPhoneNumber,
+		   date_format(testPhone.test_phone_sdate, '%Y-%m-%d') AS testPhoneStoreDate,
+		   testPhone.test_phone_state AS testPhoneState,
+		   testPhone.user_name AS userName
+	FROM test_phone_info testPhone, (select @RNUM:=0)R
+	WHERE testPhone.test_phone_number LIKE CONCAT('%',#{testPhoneNumber},'%')
+	  AND testPhone.user_name LIKE CONCAT('%',#{userName},'%') 
+	  AND testPhone.test_phone_state <> 'D'
+	ORDER BY testPhone.test_phone_id DESC
+	]]>    		   
+</select>
+
+<!-- 테스트폰 등록 -->
+<insert id="testPhoneInfoInsert" parameterType="com.tmap.systemmanagement.vo.TestPhoneInfoListVO">
+	INSERT 
+	INTO test_phone_info (test_phone_number, 
+				  		  test_phone_state, 
+				  		  test_phone_sdate,
+				  		  user_name,
+				  		  user_id,
+				  		  etc) 
+	VALUES (#{testPhoneNumber}, 
+		    #{testPhoneState}, 
+		    CURRENT_TIMESTAMP,
+		    #{userName},
+		    #{userId},
+		    #{etc})
+</insert>
+
+<!-- 테스트폰 상세정보 -->
+<select id="testPhoneModifyInfo" parameterType="com.tmap.systemmanagement.vo.TestPhoneInfoListVO" resultType="com.tmap.systemmanagement.vo.TestPhoneInfoListVO">
+	SELECT test_phone_id AS testPhoneSeq,
+		   test_phone_sdate AS testPhoneStoreDate,
+		   test_phone_number AS testPhoneNumber,
+		   test_phone_state AS testPhoneState,
+		   user_name AS userName,
+		   user_id AS userId,
+		   etc 
+	FROM test_phone_info 
+	WHERE test_phone_id=#{testPhoneSeq}
+</select>
+
+<!-- 테스트폰 수정 -->
+<update id="testPhoneInfoUpdate" parameterType="com.tmap.systemmanagement.vo.TestPhoneInfoListVO">
+	UPDATE test_phone_info 
+	SET etc=#{etc}, 
+		test_phone_number=#{testPhoneNumber}, 
+		test_phone_state=#{testPhoneState} 
+	WHERE test_phone_id=#{testPhoneSeq}
+</update>
+
+<!-- 테스트폰 삭제 -->
+<update id="testPhoneInfoDelete" parameterType="com.tmap.systemmanagement.vo.TestPhoneInfoListVO">
+	UPDATE test_phone_info 
+	SET test_phone_state = 'D' 
+	WHERE test_phone_id=#{testPhoneSeq}
+</update>
+
+</mapper>

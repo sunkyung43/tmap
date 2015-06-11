@@ -1,0 +1,124 @@
+
+/* */
+.topMenuInfo { position:absolute; top: 120; left:0; width: 100%; height: 60px;  background: #FFAC8C; }
+.topMenuInfo h5 { text-align:center; margin-left:-620; color: white; font-weight:bold; font-size:2em; height:20; margin-top: 18; }
+.topMenuInfo h2 { text-align:center; margin-left:512; font-size:90%; color: white }
+
+#bodyDiv { margin-top:190; padding:0; text-align:center;}
+.contentsDiv { display:inline-block;}
+/*Main*/
+.contentDiv { width:750px; text-align:left; margin-top:20; }
+.contentDiv span { font-weight: bold; font-size: 16; margin-left: 15;}
+
+/* */
+.sub_0601_table { margin-top:8px; width:100%; border-top:2px solid #b2b2b2; color:#393838}
+.sub_0601_table th { padding-top:11px; padding-bottom:9px; text-align:center; font-size: 12px; border-bottom:1px solid #cfcfcf; background-color:#f4f4f4}
+.sub_0601_table td { font-size: 11px; padding-top: 7px; padding-bottom: 5px; text-align: center; border-top: 1px solid #CFCFCF;}
+.sub_0601_table .td03 { border-bottom:1px solid #b5b5b5 }
+.sub_0601_table .td04 {text-align: center; border:0; background-color: #FFF;}
+.sub_0601_table .td05 { padding-left: 30px; padding-right: 30px; text-align: left;}
+.sub_0601_table .notContent {text-align:center;}
+.sub_0601_table .reg_input { height:17px; border:1px solid #ccc; vertical-align:middle; font-size:11px; margin-right:5px; text-align: right; padding-right: 10;}
+
+/*Modify 20090921*/
+#sub0601_page1 { padding:10px 0px; height:20px;  }
+/*Modify 20090921 - end*/
+#sub0601_page1 ul { text-align:center; font-family:Verdana; font-size:11px}
+#sub0601_page1 li { display:inline;}
+#sub0601_page1 li * { vertical-align:middle}
+#sub0601_page1 li a { display:inline-block; padding:0px 4px; color:#929292}
+#sub0601_page1 li a:hover { color:#000}
+#sub0601_page1 li a.btn { display:inline-block; padding:0px; .padding:4px 0px 0px;}
+#sub0601_page1 li a.pre { margin-right:4px}
+#sub0601_page1 li a.next { margin-left:4px}
+#sub0601_page1 li strong { display:inline-block; padding:0px 4px; color:#ff4e00}
+/*e:paging*/
+
+/*s:paging*/
+#sub0601_page2 { padding:10px 0px;}
+#sub0601_page2 ul { text-align:center; font-family:Verdana; font-size:11px}
+#sub0601_page2 li { display:inline;}
+#sub0601_page2 li * { vertical-align:middle}
+#sub0601_page2 li a { display:inline-block; padding:0px 4px; color:#929292}
+#sub0601_page2 li a:hover { color:#000}
+#sub0601_page2 li a.btn { display:inline-block; padding:0px; .padding:4px 0px 0px;}
+#sub0601_page2 li a.pre { margin-right:4px}
+#sub0601_page2 li a.next { margin-left:4px}
+#sub0601_page2 li strong { display:inline-block; padding:0px 4px; color:#ff4e00}
+/*e:paging*/
+
+#search { border: 1px solid #E6E6E6; background-color: #F9F9F9; height: 40px; text-align: center; padding-top: 6px; }
+#hissearch { width: 749px; border: 1px solid #E6E6E6; background-color: #F9F9F9; height: 55px; text-align: center; padding-top: 6px; }
+#search .text01 { width: 129px; height: 25px; }
+#search .select01 { margin-left: 4px; text-align: center; color: #666; font-size: 90%; }
+
+/* Edit */
+.srvRegiEdit {width: 650px}
+.srvRegiEdit th {width:80px; text-align:left; padding:12px 0 6px 8px; background:#f4f4f4; border-bottom:1px solid #e0e0e0; vertical-align:top; font-size:11px; color: #999;}
+.srvRegiEdit tr.td06 {border-top: 2px solid #b2b2b2;}
+.srvRegiEdit td {position:relative; padding:6px 0 6px 24px; font-size:12px; border-bottom:1px solid #e0e0e0}
+.srvRegiEdit th.td06 {border-top: 2px solid #b2b2b2;}
+
+/*������������������ �������� */
+.srvRegi {width:740px}
+.srvRegi tr.top {border-top: 2px solid #b2b2b2;}
+.srvRegi tr.td06 {border-top: 2px solid #b2b2b2;}
+.srvRegi th {width:80px; text-align:left; padding:12px 0 6px 8px; background:#f4f4f4; border-bottom:1px solid #e0e0e0; vertical-align:top; font-size:11px; color: #999;}
+.srvRegi th.first {border-top:2px solid #b2b2b2}
+.srvRegi th.td06 { border-top:1px solid #e0e0e0 }
+.srvRegi td {position:relative; padding:6px 0 6px 24px; font-size:12px; border-bottom:1px solid #e0e0e0}
+.srvRegi td label {font-size:11px}
+.srvRegi td img {vertical-align:middle}
+.srvRegi td.first {border-top:2px solid #b2b2b2}
+.srvRegi td.td06 { border-top:1px solid #e0e0e0 }
+.srvRegi td p {padding-top:2px}
+.srvRegi td span {display:inline-block}
+.srvRegi td .pwArea {position:relative; top:0; display:inline-block; float:left;  margin-right:20px; font-size:11px !important}
+.srvRegi td .pwOr {position:absolute; top:-1px; *top:4px; left:85px; display:inline-block}
+.srvRegi td .pwOr02 {position:absolute; top:-1px; *top:2px; left:95px}
+.srvRegi td .pwTxt {position:absolute; top:0; left:126px; width:300px}
+.srvRegi td p.txt01 {font-weight:bold; color:#f05500}
+.srvRegi td p.txt01 span {font-weight:normal; color:#848484}
+.srvRegi td p.txt02 {margin:5px 0 10px 0; line-height:1.2; color:#868686}
+.srvRegi td p.txt03 {margin:5px 0 0 0; line-height:1.2; color:#868686}
+.srvRegi td .regiInput,
+.courtAgent td .regiInput,
+.integrationLogin td .regiInput,
+.integrationLogin02 td .regiInput,
+.searchCnt .regiInput,
+.searchForm .regiInput {height:17px; border:1px solid #ccc; vertical-align:middle; font-size:12px; margin-right:5px; width:250px;}
+
+.srvRegi td label, .searchCnt label {vertical-align:middle; margin-top:4px; display:inline-block}
+.srvRegi td .regiInput02{border:1px solid #58a300}
+.srvRegi td .checkbox {width:12px; height:12px; margin-right:3px}
+.srvRegi td .noBorder {border:0px}
+.srvRegi td div.noti {font-size:11px;color:#FF0000; margin-left: 20px; margin-top: 5px;}
+
+/* footer renewal */
+#footerWrap {clear:both; margin:45px 0 0 0; border-top:1px solid #d6d6d6; padding-bottom:30px}
+.footerArea {width:100%; text-align:center; overflow:hidden; margin:0 auto; }
+.footerArea .footer_logo { float:left; width:83px; height:39px; margin:27px 60px 0 4px; background:url(images/footer/main_footer_logo.gif) no-repeat; text-indent:-5000px}
+.footerArea .footer_r { float:left; margin-top:5px}
+.footerArea .footer_path ul {overflow:hidden; margin-bottom:10px; padding:0}
+.footerArea .footer_path li { float:left; padding:0 5px 0 0; }
+.footerArea .footer_path li a { display:block;}
+
+.footerArea .footer_path li.p1 { width:53px; height:12px; background:url(images/main_footer1.gif) no-repeat left;}
+.footerArea .footer_path li.p2 { width:94px; height:12px; background:url(images/main_footer2.gif) no-repeat left;}
+.footerArea .footer_path li.p3 { width:103px; height:12px; background:url(images/main_footer3.gif) no-repeat left;}
+.footerArea .footer_path li.p4 { width:106px; height:12px; background:url(images/main_footer4.gif) no-repeat left;}
+.footerArea .footer_path li.p5 { width:42px; height:12px; background:url(images/footer/main_footer5.gif) no-repeat left;}
+
+.address { clear:both; width:233px; height:22px; background:url(images/footer/main_address.gif) no-repeat;}
+
+.phoneSearch dl dd .phoneManufacturer {overflow:hidden; width:580px}
+.phoneSearch dl dd .phoneManufacturer li,
+.phoneSearch dl dd .phoneManufacturer li :visited
+{font-weight:bold; color:#626262; text-decoration:none; background:url(../images/list/bt_tabbg.gif) no-repeat 0 0;
+display:inline-block; width:114px; padding:3px 0 3px 0; text-align:center; margin-right:2px}
+.phoneSearch dl dd .phoneManufacturer li :hover,
+.phoneSearch dl dd .phoneManufacturer li :active
+{color:#fff !important; background:url(../images/list/bt_tabbg_on.gif) no-repeat 0 0}
+.phoneSearch dl dd .phoneManufacturer .on {color:#fff !important; font-weight:bold; text-decoration:none; padding:3px 0 0 0; height:30px; text-align:center;
+background:url(../images/list/bt_tabbg_on.gif) no-repeat 0 0 !important;} 
+

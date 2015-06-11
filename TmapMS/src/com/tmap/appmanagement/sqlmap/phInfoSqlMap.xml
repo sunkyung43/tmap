@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.phInfoSqlMap">
+	
+<!-- 단말정보 리스트 수 -->
+<select id="countPhInfoList" parameterType="com.tmap.appmanagement.vo.PhInfoListVO" resultType="java.lang.Integer">
+	SELECT count(*) 
+	FROM phone_info 
+	WHERE ph_state != "D"   
+	<if test="phName != null">AND ph_name LIKE CONCAT('%',#{phName},'%')</if>
+	<if test="phMade != null">AND ph_made LIKE CONCAT('%',#{phMade},'%')</if>
+</select>
+
+<!-- 단말정보 리스트 -->
+<select id="phInfoList" parameterType="com.tmap.appmanagement.vo.PhInfoListVO" resultType="com.tmap.appmanagement.vo.PhInfoListVO">
+	SELECT ph_id AS phInfoSeq,
+		   ph_name AS phName,
+		   ph_content AS phContent,
+		   ph_sdate AS phStoreDate,
+		   ph_state AS phState,
+		   ph_made AS phMade,
+		   ph_division AS phDivision
+	FROM phone_info
+	WHERE ph_state != "D"
+	<if test="phName != null">AND ph_name LIKE CONCAT('%',#{phName},'%')</if>
+	<if test="phMade != null">AND ph_made LIKE CONCAT('%',#{phMade},'%')</if>
+	ORDER BY ph_name DESC  		   
+</select>
+
+<select id="phMadeList" parameterType="com.tmap.appmanagement.vo.PhInfoListVO" resultType="com.tmap.appmanagement.vo.PhInfoListVO">
+	SELECT ph_made AS phMade
+	FROM phone_info
+	WHERE ph_state != 'D'
+	GROUP BY ph_made   
+</select>
+
+<!-- 단말정보 리스트 -->
+<select id="phOsInfo" parameterType="com.tmap.appmanagement.vo.PhInfoListVO" resultType="com.tmap.appmanagement.vo.PhInfoListVO">
+	SELECT ph_id AS phInfoSeq,
+		   ph_name AS phName,
+		   ph_content AS phContent,
+		   ph_sdate AS phStoreDate,
+		   ph_state AS phState,
+		   ph_made AS phMade
+	FROM phone_info
+	WHERE ph_name LIKE CONCAT('%',#{phName},'%')  
+	  AND ph_made LIKE CONCAT('%',#{phMade},'%')
+	  AND ph_state = 'Y'
+	ORDER BY ph_name DESC   		   
+</select>
+
+<!-- 단말정보 등록 -->
+<insert id="phInfoInsert" parameterType="com.tmap.appmanagement.vo.PhInfoListVO">
+	INSERT 
+	INTO phone_info (ph_name,
+		  			 ph_content,
+		   			 ph_sdate,
+		   			 ph_state,
+		   			 ph_made,
+                     ph_division) 
+	VALUES (#{phName}, 
+		    #{phContent}, 
+		    CURRENT_TIMESTAMP, 
+		    #{phState},
+		    #{phMade},
+            #{phDivision})
+</insert>
+
+<!-- 단말정보 상세정보 -->
+<select id="phModifyList" parameterType="com.tmap.appmanagement.vo.PhInfoListVO" resultType="com.tmap.appmanagement.vo.PhInfoListVO">
+	SELECT ph_id AS phInfoSeq,
+		   ph_name AS phName,
+		   ph_content AS phContent,
+		   ph_sdate AS phStoreDate,
+		   ph_state AS phState,
+		   ph_made AS phMade,
+           ph_division AS phDivision
+	FROM phone_info 
+	WHERE ph_id=#{phInfoSeq}
+</select>
+
+<!-- 단말정보 수정-->
+<update id="phInfoUpdate" parameterType="com.tmap.appmanagement.vo.PhInfoListVO">
+	UPDATE phone_info 
+	SET ph_content = #{phContent}, 
+		ph_state = #{phState},
+		ph_division = #{phDivision}
+	WHERE ph_id=#{phInfoSeq}
+</update>
+
+<!-- 단말정보 삭제 -->
+<update id="phInfoDelete" parameterType="com.tmap.appmanagement.vo.PhInfoListVO">
+	UPDATE phone_info 
+	SET ph_state = 'D' 
+	WHERE ph_id=#{phInfoSeq}
+</update>
+
+</mapper>

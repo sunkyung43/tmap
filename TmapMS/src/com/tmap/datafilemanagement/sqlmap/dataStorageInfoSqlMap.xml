@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.dataStorageSqlMap">
+
+<sql id="dataStorageInfoList-searchCondition">
+		<where>
+			<if test="searchDataStorageState.equalsIgnoreCase('ALL')">
+			storage_state in ('Y', 'N')
+			</if>
+			<if test="!searchDataStorageState.equalsIgnoreCase('ALL')">
+			storage_state = #{searchDataStorageState}
+			</if>
+			<if test="searchDataStorageCurrent.equalsIgnoreCase('ALL')">
+			and storage_current in ('C', 'O')
+			</if>
+			<if test="!searchDataStorageCurrent.equalsIgnoreCase('ALL')">
+			and storage_current = #{searchDataStorageCurrent}
+			</if>
+			
+			<if test="searchDataStorageName != null and !searchDataStorageName.equalsIgnoreCase('')">
+			and storage_name like concat(#{searchDataStorageName},'%')
+			</if>	
+		</where>	
+	</sql>
+	<select id="dataStorageInfoList" parameterType="dataStorageInfoVO" resultType="dataStorageInfoVO">
+		<include refid="dataStorageInfoList-pageing-start"/>
+		select storage_id AS storageId
+			 , storage_name AS storageName
+			 , storage_content AS storageContent
+			 , storage_mount AS storageMount
+			 , storage_state AS storageState
+			 , DATE_FORMAT(storage_sdate, '%Y-%m-%d') AS storageSdate
+			 , CASE storage_current WHEN 'C' THEN '현재 사용중' WHEN 'O' THEN '과거 사용' END AS storageCurrent
+		  from data_storage_info
+		  where storage_state != 'D'
+		 <!-- <include refid="dataStorageInfoList-searchCondition"/>  -->
+		order by storage_sdate ASC
+		<include refid="dataStorageInfoList-pageing-end"/>
+	</select>
+	
+	<select id="countDataStorageInfoList" parameterType="dataStorageInfoVO" resultType="java.lang.Integer">
+		select count(storage_id) totalCount
+		  from data_storage_info
+		  where storage_state != 'D'
+		<!-- <include refid="dataStorageInfoList-searchCondition"/> -->
+	</select>
+	
+	<sql id="dataStorageInfoList-pageing-start">
+	SELECT *
+	FROM (
+	SELECT @NO := @NO + 1 AS ROWNUM, A.*
+	FROM
+	  (
+	</sql>
+	
+	<sql id="dataStorageInfoList-pageing-end">
+	  ) A,
+	  ( SELECT @NO := 0 ) B 
+	) C
+	ORDER BY C.ROWNUM DESC
+	</sql>
+	
+	<select id="dataStorageInfoListForSelectBox" parameterType="dataStorageInfoVO" resultType="dataStorageInfoVO">
+		select storage_id AS storageId
+			 , storage_name AS storageName
+		  from data_storage_info
+		 where storage_state = 'Y'
+		   and storage_current = 'C'
+		order by storage_name ASC	
+	</select>
+	
+	<select id="dataStorageInfo" parameterType="dataStorageInfoVO" resultType="dataStorageInfoVO">
+		select storageinfo.storage_id AS storageId
+			 , storageinfo.storage_name AS storageName
+			 , storageinfo.storage_mount AS storageMount
+			 , storageinfo.storage_content AS storageContent
+			 , storageinfo.storage_state AS storageState
+			 , DATE_FORMAT(storageinfo.storage_sdate, '%Y-%m-%d') AS storageSdate
+			 , storageinfo.storage_current AS storageCurrent
+			 , (select count(storage_id) from data_file_info where storage_id = storageinfo.storage_id) AS useCount
+		  from data_storage_info storageinfo
+		 where storageinfo.storage_id = #{storageId}
+	</select>	
+	
+	<update id="dataStorageInfoUpdate" parameterType="dataStorageInfoVO">
+		update data_storage_info 
+		   set storage_name = #{storageName}
+			 , storage_mount = #{storageMount}
+			 , storage_content = #{storageContent}
+			 , storage_state = #{storageState}
+			 , storage_current = #{storageCurrent}
+		 where storage_id = #{storageId}
+	</update>
+	
+	<update id="dataStorageInfoDelete" parameterType="dataStorageInfoVO">
+		update data_storage_info 
+		set storage_state = 'D'
+		where storage_id = #{storageId}
+	</update>
+	
+	<insert id="dataStorageInfoInsert" parameterType="dataStorageInfoVO">
+		insert into data_storage_info (
+			  storage_name	
+			, storage_mount
+			, storage_state
+			, storage_content
+			, storage_current
+			, storage_sdate
+		) 
+		values(
+			  #{storageName}
+			, #{storageMount}
+			, 'Y'
+			, #{storageContent}
+			, #{storageCurrent}
+			, sysdate()
+		)
+		<selectKey resultType="String" keyProperty="storageId">
+		SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>	
+</mapper>

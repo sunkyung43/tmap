@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="downloadInfoSqlMap">
+
+	<!-- 등록 서버관리 resultMap -->
+	<resultMap id="downloadInfoMap" type="downloadInfoVO">
+		<result property="serverId" column="server_id" javaType="java.lang.String" />
+		<result property="serverUrl" column="server_url" javaType="java.lang.String" />
+		<result property="serverContent" column="server_content"
+			javaType="java.lang.String" />
+		<result property="serverState" column="server_state" javaType="java.lang.String" />
+		<result property="serverSdate" column="server_sdate" javaType="java.lang.String" />
+		<result property="serverType" column="server_type" javaType="java.lang.String" />
+		<result property="serverPort" column="server_port" javaType="java.lang.String" />
+	</resultMap>
+
+	<!-- 등록 서버관리 리스트 수 -->
+<!-- 	<select id="countDownloadInfoList" parameterType="downloadInfoVO"
+		resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(*)
+	FROM dowload_server_info
+	WHERE server_state <> 'D'
+	ORDER BY server_sdate DESC
+	]]>
+	</select> -->
+
+	<!-- 등록 서버관리 리스트 -->
+	<select id="downloadInfoList" parameterType="String"
+		resultMap="downloadInfoMap">
+	<![CDATA[
+	SELECT
+		server_id,
+		   server_content,
+		   server_type, 
+		   server_sdate,
+		   server_state
+	FROM download_server_info
+	WHERE server_type = #{serverType}
+    
+	]]>
+	</select>
+
+	<!-- 등록 서버관리 등록 -->
+	<insert id="downloadInfoInsert" parameterType="downloadInfoVO">
+		INSERT
+		INTO download_server_info (server_url,
+								   server_port,
+								   server_type,
+							       server_state,
+							       server_content,
+							       server_sdate)
+		VALUES (#{serverUrl},
+				#{serverPort},
+				#{serverType},
+				#{serverState},
+				#{serverContent},
+				now())
+	</insert>	
+
+	<select id="getServerId" parameterType="String" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT MAX(server_id) 
+	FROM download_server_info 
+	WHERE server_state <> 'D' LIMIT 1
+	]]>
+	</select>
+	
+	<!-- 등록 서버관리 Detail -->
+	<select id="downloadInfo" parameterType="String" resultType="downloadInfoVO">
+	<![CDATA[
+	SELECT server_url AS serverUrl, 
+	       server_type AS serverType,
+		   server_state AS serverState,
+		   server_content AS serverContent, 
+		   DATE_FORMAT(server_sdate, '%Y-%m-%d') AS serverSdate,
+		   server_id AS serverId,
+		   server_port AS serverPort
+	FROM download_server_info
+	WHERE server_type = #{serverType}
+	]]>
+	</select>
+
+	<!-- 등록 서버관리 수정 -->
+	<update id="downloadUpdate" parameterType="downloadInfoVO">
+		UPDATE
+		download_server_info
+		SET 
+		server_url = #{serverUrl},
+		server_port = #{serverPort},
+		server_content = #{serverContent},
+		server_state = #{serverState}
+		WHERE server_id = #{serverId}
+	</update>
+	
+	 <select id="rsServerList" resultType="systemInfoVO"> 
+	  SELECT	system_id 		AS systemId, 
+				system_name 	AS systemName, 
+				system_ip_out 	AS systemIpOut,
+				system_ip_in 	AS systemIpIn, 
+				system_port_out AS systemPortOut, 
+				system_port_in 	AS systemPortIn
+	  FROM 		system_info
+	  WHERE 	server_type_code = '2' 
+	  AND		SYSTEM_STATE = 'Y'
+  </select>
+
+</mapper>
+	

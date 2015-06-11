@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tmap.sqlMap.templetModelSqlMap">
+
+<!-- 단말조합 resultMap -->
+<resultMap id="templetModelMap" type="com.tmap.appmanagement.vo.TempletModelInfoListVO">
+    <result property="rownum"         		column="ROWNUM"         		javaType="java.lang.String" />
+    <result property="templetModelId"       column="templet_model_id"   	javaType="java.lang.String" />
+    <result property="templetModelName"     column="templet_model_name"    	javaType="java.lang.String" />
+    <result property="templetModelContent"  column="templet_model_content"  javaType="java.lang.String" />
+    <result property="templetModelState"    column="templet_model_state"    javaType="java.lang.String" />
+    <result property="templetModelSdate"    column="templet_model_sdate"  	javaType="java.lang.String" />
+    <result property="phModelInfoSeq"       column="ph_model_id"  			javaType="java.lang.String" />
+    <result property="osVerName"       		column="os_ver_name"  			javaType="java.lang.String" />
+    <result property="osVerContent"       	column="os_ver_content"  		javaType="java.lang.String" />
+    <result property="phName"       		column="ph_name"  				javaType="java.lang.String" />
+    <result property="phContent"       		column="ph_content"  			javaType="java.lang.String" />
+    <result property="osVerId"       		column="os_ver_id"  			javaType="java.lang.String" />
+    <result property="phId"       			column="ph_id"  				javaType="java.lang.String" />
+</resultMap>
+	
+<!-- 단말조합 리스트 수 -->
+<select id="countTempletModelInfoList" parameterType="com.tmap.appmanagement.vo.TempletModelInfoListVO" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(*)
+	FROM templet_model_info
+	WHERE templet_model_name LIKE CONCAT('%',#{templetModelName},'%')
+	  AND templet_model_state <> 'D'
+	]]>
+</select>
+
+<!-- 단말조합 리스트 -->
+<select id="templetModelInfoList" parameterType="com.tmap.appmanagement.vo.TempletModelInfoListVO" resultMap="templetModelMap">
+	<![CDATA[
+	SELECT @RNUM := @RNUM +1 AS rownum, 
+		   TM.templet_model_id, 
+		   TM.templet_model_name, 
+		   TM.templet_model_content, 
+		   TM.templet_model_state, 
+		   DATE_FORMAT(TM.templet_model_sdate, '%Y-%m-%d') AS templetModelSdate
+	FROM templet_model_info TM, (select @RNUM:=0)R
+	WHERE TM.templet_model_name LIKE CONCAT('%',#{templetModelName},'%')
+	  AND TM.templet_model_state <> 'D'
+	ORDER BY TM.templet_model_id DESC  
+	]]>
+</select>
+
+<!-- 단말조합 등록폼 - 단말모델 정보 리스트 -->
+<select id="templetModelInfoNew" resultType="com.tmap.appmanagement.vo.TempletModelInfoListVO">
+	<![CDATA[
+	SELECT @RNUM := @RNUM +1 AS rownum,
+		   MO.ph_model_id AS phModelInfoSeq, 
+		   OS.os_ver_name AS osVerName, 
+		   OS.os_ver_content AS osVerContent, 
+		   PH.ph_name AS phName, 
+		   PH.ph_content AS phContent,
+		   MO.os_ver_id AS osVerId,
+		   MO.ph_id AS phId
+	  FROM phone_info PH, os_ver_info OS, phone_model_info MO, (select @RNUM:=0)R
+	 WHERE MO.ph_id = PH.ph_id
+	   AND MO.os_ver_id = OS.os_ver_id
+	   AND MO.ph_model_state = 'Y'
+	   AND PH.ph_name LIKE CONCAT('%',#{phName},'%')
+	   AND PH.ph_division LIKE CONCAT('%',#{phDivision},'%') 
+	 ORDER BY PH.ph_name ASC, OS.os_ver_name ASC
+	]]>
+</select>
+
+<!-- 단말조합 등록 - 단말조합 정보 등록 -->
+<insert id="templetModelInfoInsert" parameterType="com.tmap.appmanagement.vo.TempletModelInfoListVO">
+	INSERT 
+	INTO templet_model_info (templet_model_name, 
+							 templet_model_content, 
+							 templet_model_state, 
+							 templet_model_sdate)
+	VALUES (#{templetModelName}, 
+			#{templetModelContent}, 
+			#{templetModelState}, 
+			CURRENT_TIMESTAMP)							 
+</insert>
+
+<!-- 단말조합 - 마지막 등록된 templetModelId 정보출력 -->
+<select id="templetModelInfoSeq" resultType="String">
+	SELECT templet_model_id AS templetModelId 
+	FROM templet_model_info 
+	WHERE templet_model_name = #{templetModelName}
+</select>
+
+<!-- 단말조합 등록 - templet_model_list_info -->
+<insert id="osPhInfoInsert" parameterType="com.tmap.appmanagement.vo.TempletModelInfoListVO">
+	INSERT 
+	INTO templet_model_list_info (templet_model_id, 
+						 		  ph_model_id, 
+						 		  templet_model_state) 
+	VALUES (#{templetModelId},
+			#{phModelInfoSeq},
+			'Y')
+</insert>
+
+<!-- 단말조합 정보 -->
+<select id="templetModelInfo" parameterType="String" resultMap="templetModelMap">
+	SELECT templet_model_id, 
+		   templet_model_name, 
+		   templet_model_content, 
+		   templet_model_state, 
+		   templet_model_sdate
+	FROM templet_model_info
+	WHERE templet_model_id = #{templetModelId}	   
+</select>
+
+<!-- 단말조합에 등록된 단말모델 -->
+
+<select id="appUseOsPh" resultMap="templetModelMap" parameterType="String">
+	SELECT MO.ph_model_id, 
+		   OS.os_ver_name, 
+		   OS.os_ver_content, 
+		   PH.ph_name, 
+		   PH.ph_content,
+		   MO.os_ver_id,
+		   MO.ph_id
+	FROM templet_model_list_info OSPH, phone_model_info MO, phone_info PH, os_ver_info OS
+	WHERE OSPH.ph_model_id = MO.ph_model_id
+	  AND MO.ph_id = PH.ph_id
+	  AND MO.os_ver_id = OS.os_ver_id
+	  AND OSPH.templet_model_id = #{templetModelId}
+	  AND OSPH.templet_model_state = 'Y'
+	GROUP BY MO.ph_model_id
+	ORDER BY PH.ph_name ASC, OS.os_ver_name ASC
+</select>
+
+<!-- 단말조합에 등록되지 않은 단말모델 -->
+<select id="allOsPhInfo" resultMap="templetModelMap" parameterType="com.tmap.appmanagement.vo.TempletModelInfoListVO">
+	SELECT MO.ph_model_id, 
+		   OS.os_ver_name, 
+		   OS.os_ver_content, 
+		   PH.ph_name, 
+		   PH.ph_made,
+		   PH.ph_content,
+		   MO.os_ver_id,
+		   MO.ph_id
+	FROM phone_info PH, 
+		 os_ver_info OS,
+		 (SELECT * 
+		  FROM phone_model_info
+		  WHERE ph_model_id IN (SELECT A.ph_model_id 
+                           		FROM(SELECT ph_model_id
+                                	 FROM phone_model_info) A 
+                            		 LEFT JOIN(SELECT PHMODEL.ph_model_id
+					               	  		   FROM phone_model_info PHMODEL, 
+					               				  	templet_model_list_info OSPH
+					              			   WHERE PHMODEL.ph_model_id = OSPH.ph_model_id
+					                		  	 AND OSPH.templet_model_id = #{templetModelId}
+					                			 AND OSPH.templet_model_state = 'Y') B 
+					                 ON A.ph_model_id = B.ph_model_id
+                                     WHERE B.ph_model_id is null            
+					              )
+		 ) MO
+	WHERE MO.ph_id = PH.ph_id
+	  AND MO.os_ver_id = OS.os_ver_id
+	  AND MO.ph_model_state = 'Y'
+	  AND PH.ph_name LIKE CONCAT('%',#{phName},'%') 
+	  AND PH.ph_division LIKE CONCAT('%',#{phDivision},'%') 
+	ORDER BY PH.ph_name ASC, OS.os_ver_name ASC
+</select>	
+
+<!-- 단말조합 수정 - 단말조합 정보 수정 -->
+<update id="templetModelInfoUpdate" parameterType="com.tmap.appmanagement.vo.TempletModelInfoListVO">
+	UPDATE templet_model_info
+	SET templet_model_content = #{templetModelContent},
+		templet_model_state = #{templetModelState}
+	WHERE templet_model_id = #{templetModelId}
+</update>
+
+<!-- 기존 등록된 단말모델 사용여부 변경 -->
+<update id="osPhInfoDelete" parameterType="String">
+	UPDATE templet_model_list_info
+	SET templet_model_state = 'D'
+	WHERE templet_model_id = #{templetModelId}
+</update>
+
+<!-- 단말조합 삭제 -->
+<update id="templetModelInfoDelete" parameterType="String">
+	UPDATE templet_model_info
+	SET templet_model_state = 'D'
+	WHERE templet_model_id = #{templetModelId} 
+</update>
+
+</mapper>

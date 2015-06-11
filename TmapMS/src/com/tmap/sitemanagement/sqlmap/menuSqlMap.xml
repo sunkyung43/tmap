@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.menuSqlMap">
+
+<!-- 메뉴 리스트 수 -->
+<select id="countMenuInfoList" parameterType="com.tmap.sitemanagement.vo.MenuInfoListVO" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT count(*) 
+	FROM menu_info 
+	WHERE menu_id LIKE CONCAT('%',#{sMenuId},'%') 
+	  AND menu_name LIKE CONCAT('%',#{menuName},'%')
+	  AND menu_state <> 'D'
+	]]>   
+</select>
+
+<!-- 메뉴 리스트 -->
+<select id="menuInfoList" parameterType="com.tmap.sitemanagement.vo.MenuInfoListVO" resultType="com.tmap.sitemanagement.vo.MenuInfoListVO">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum,
+		   menu.menu_id AS menuId,
+		   menu.menu_hi_id AS hMenuId,
+		   menu.menu_name AS menuName,
+		   menu.etc,
+		   menu.menu_level AS menuLevel,
+		   menu.menu_state AS useFlag,
+		   menu.menu_url AS menuUrl,
+		   menu.menu_order AS menuOrder
+	FROM menu_info menu, (select @RNUM:=0)R
+	WHERE menu.menu_id LIKE CONCAT('%',#{sMenuId},'%') 
+	  AND menu_name LIKE CONCAT('%',#{menuName},'%')
+	  AND menu.menu_state <> 'D'
+	ORDER BY menu.menu_id DESC
+	]]>    		   
+</select>
+
+<!-- 상위메뉴 리스트 출력 -->
+<select id="hMenuList" resultType="com.tmap.sitemanagement.vo.MenuInfoListVO">
+	<![CDATA[
+	SELECT menu_id AS menuId , 
+		   menu_name AS menuName 
+	FROM menu_info 
+	WHERE menu_level = 1
+	  AND menu_state <> 'D'
+	]]>   
+</select>
+
+<!-- 메뉴 등록 -->
+<insert id="menuInfoInsert" parameterType="com.tmap.sitemanagement.vo.MenuInfoListVO">
+	INSERT 
+	INTO menu_info (menu_id, 
+				    menu_hi_id, 
+				    menu_name, 
+				    menu_url, 
+				    menu_state, 
+				    menu_order, 
+				    etc,
+				    menu_level) 
+	VALUES (#{menuId}, 
+		    #{hMenuId}, 
+		    #{menuName}, 
+		    #{menuUrl}, 
+		    #{useFlag}, 
+		    #{menuOrder},
+		    #{etc},
+		    #{menuLevel})
+</insert>
+
+<!-- 메뉴 상세정보 -->
+<select id="menuModifyInfo" parameterType="com.tmap.sitemanagement.vo.MenuInfoListVO" resultType="com.tmap.sitemanagement.vo.MenuInfoListVO">
+	SELECT  menu_id AS menuId, 
+		    menu_hi_id AS hMenuId, 
+			menu_name AS menuName, 
+			menu_url AS menuUrl, 
+			menu_state AS useFlag, 
+			menu_order AS menuOrder, 
+			etc,
+			menu_level AS menuLevel 
+	FROM menu_info 
+	WHERE menu_id=#{menuId}
+</select>
+
+<!-- 메뉴 수정 -->
+<update id="menuInfoUpdate" parameterType="com.tmap.sitemanagement.vo.MenuInfoListVO">
+	UPDATE menu_info 
+	SET menu_hi_id = #{hMenuId}, 
+		menu_name = #{menuName}, 
+		menu_url = #{menuUrl}, 
+		menu_state = #{useFlag}, 
+		menu_order = #{menuOrder}, 
+		etc = #{etc},
+		menu_level = #{menuLevel} 
+	WHERE menu_id=#{menuId}
+</update>
+
+<!-- 메뉴 삭제 -->
+<update id="menuInfoDelete" parameterType="com.tmap.sitemanagement.vo.MenuInfoListVO">
+	UPDATE menu_info 
+	SET menu_state = 'D' 
+	WHERE menu_id=#{menuId}
+</update>
+
+<!-- 아이디 중복체크 -->
+<select id="countSameId" parameterType="java.lang.String" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(menu_id) 
+	FROM menu_info 
+	WHERE menu_id = #{id}
+	  AND menu_state <> 'D'
+	]]>
+</select>
+
+</mapper>

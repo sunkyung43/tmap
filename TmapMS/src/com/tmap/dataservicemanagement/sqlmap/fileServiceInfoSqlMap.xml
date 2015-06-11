@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tmap.sqlMap.fileServiceInfoSqlMap">
+
+	<!-- 파일 서비스 리스트 resultMap -->
+	<resultMap id="fileServiceMap" type="fileServiceInfoVO">
+		<result property="rownum" column="rownum" javaType="java.lang.String" />
+		<result property="dataTypeName" column="data_type_name"
+			javaType="java.lang.String" />
+		<result property="dataTypeId" column="data_type_id" javaType="java.lang.String" />
+		<result property="dataFileName" column="data_file_name"
+			javaType="java.lang.String" />
+		<result property="dataFileId" column="data_file_id" javaType="java.lang.String" />
+		<result property="dataFileContent" column="data_file_content"
+			javaType="java.lang.String" />
+		<result property="dataFileStore" column="data_file_store"
+			javaType="java.lang.String" />
+		<result property="storageName" column="storage_name" javaType="java.lang.String" />
+		<result property="fileServId" column="file_serv_id" javaType="java.lang.String" />
+		<result property="fileServState" column="file_serv_state"
+			javaType="java.lang.String" />
+		<result property="fileServSdate" column="file_serv_sdate"
+			javaType="java.lang.String" />
+		<result property="etc" column="etc" javaType="java.lang.String" />
+	</resultMap>
+
+	<!-- 데이터 타입 resultMap -->
+	<resultMap id="dataTypeInfoMap" type="dataTypeInfoVO">
+		<result property="rowSpan" column="rowSpan" javaType="java.lang.String" />
+		<result property="dataTypeId" column="data_type_id" javaType="java.lang.String" />
+		<result property="dataTypeName" column="data_type_name"
+			javaType="java.lang.String" />
+		<result property="dataTypeContent" column="data_type_content"
+			javaType="java.lang.String" />
+	</resultMap>
+
+	<!-- 데이터 파일 resultMap -->
+	<resultMap id="dataFileInfoMap" type="dataFileInfoVO">
+		<result property="dataFileId" column="data_file_id" javaType="java.lang.String" />
+		<result property="dataFileName" column="data_file_name"
+			javaType="java.lang.String" />
+		<result property="dataFileContent" column="data_file_content"
+			javaType="java.lang.String" />
+		<result property="dataFileState" column="data_file_state"
+			javaType="java.lang.String" />
+		<result property="dataFileSdate" column="data_file_sdate"
+			javaType="java.lang.String" />
+		<result property="dataFileStore" column="data_file_store"
+			javaType="java.lang.String" />
+		<result property="storageName" column="storage_name" javaType="java.lang.String" />
+	</resultMap>
+
+	<!-- 데이터 파일 버전 resultMap -->
+	<resultMap id="dataVerInfoMap" type="fileVersionInfoVO">
+		<result property="fileVerId" column="file_ver_id" javaType="java.lang.String" />
+		<result property="fileVerName" column="file_ver_name" javaType="java.lang.String" />
+		<result property="fileVerRank" column="file_ver_rank" javaType="java.lang.String" />
+		<result property="fileVerState" column="file_ver_state"
+			javaType="java.lang.String" />
+		<result property="fileVerSdate" column="file_ver_sdate"
+			javaType="java.lang.String" />
+		<result property="etc" column="etc" javaType="java.lang.String" />
+	</resultMap>
+
+	<!-- 파일 서비스 리스트 수 -->
+	<select id="countAllFileServiceList" parameterType="String"
+		resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(*)
+	FROM data_file_info DF, 
+		 data_storage_info DS, 
+		 file_service_info FS, 
+		 data_type_info DY
+	WHERE DF.data_file_id = FS.data_file_id
+	  AND DF.storage_id = DS.storage_id
+	  AND DF.data_type_id = DY.data_type_id
+	  AND FS.file_serv_state <> 'D'
+	  AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%')
+	]]>
+	</select>
+	<select id="countFileServiceList" parameterType="fileServiceInfoVO"
+		resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(*)
+	FROM data_file_info DF,
+		 data_storage_info DS, 
+		 file_service_info FS, 
+		 data_type_info DY
+	WHERE DF.data_file_id = FS.data_file_id
+	  AND DF.storage_id = DS.storage_id
+	  AND DF.data_type_id = DY.data_type_id
+	  AND FS.file_serv_state <> 'D'
+	  AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%')
+	  AND DY.data_type_id = #{dataTypeId} 
+	]]>
+	</select>
+
+	<!-- 파일 서비스 리스트 -->
+	<select id="allFileServiceList" resultMap="fileServiceMap"
+		parameterType="fileServiceInfoVO">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum,
+	       DF.data_file_name,
+	       DF.data_file_id,
+	       DS.storage_name,
+	       FS.file_serv_id,
+	       FS.file_serv_state,
+	       FS.file_serv_sdate,
+	       FS.etc,
+	       DY.data_type_name
+	FROM data_file_info DF, 
+		 data_storage_info DS, 
+		 file_service_info FS, 
+		 data_type_info DY, 
+		 (SELECT @RNUM:=0)R
+	WHERE DF.data_file_id = FS.data_file_id
+	  AND DF.storage_id = DS.storage_id
+	  AND DF.data_type_id = DY.data_type_id
+	  AND FS.file_serv_state <> 'D'
+	  AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%')
+	ORDER BY FS.file_serv_sdate DESC
+	]]>
+	</select>
+	<select id="fileServiceList" resultMap="fileServiceMap"
+		parameterType="fileServiceInfoVO">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum,
+	       DF.data_file_name,
+	       DF.data_file_id,
+	       DS.storage_name,
+	       FS.file_serv_id,
+	       FS.file_serv_state,
+	       FS.file_serv_sdate,
+	       FS.etc,
+	       DY.data_type_name
+	FROM data_file_info DF, 
+		 data_storage_info DS, 
+		 file_service_info FS, 
+		 data_type_info DY, 
+		 (SELECT @RNUM:=0)R
+	WHERE DF.data_file_id = FS.data_file_id
+	  AND DF.storage_id = DS.storage_id
+	  AND DF.data_type_id = DY.data_type_id
+	  AND FS.file_serv_state <> 'D'
+	  AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%')
+	  AND DY.data_type_id = #{dataTypeId} 
+	ORDER BY FS.file_serv_sdate DESC
+	]]>
+	</select>
+
+	<!-- 데이터 타입 리스트 -->
+	<select id="typeList" resultMap="dataTypeInfoMap">
+		SELECT data_type_id,
+		data_type_name,
+		data_type_content
+		FROM data_type_info
+		WHERE data_type_state = 'Y'
+		ORDER BY data_type_id ASC
+	</select>
+
+	<!-- 데이터 파일 리스트(등록) -->
+	<select id="fileInType" parameterType="fileServiceInfoVO"
+		resultMap="dataFileInfoMap">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum,
+		   A.data_file_id,
+		   A.data_file_name,
+		   A.data_file_content,
+		   A.data_file_state,
+		   DATE_FORMAT(A.data_file_sdate, '%Y-%m-%d') AS data_file_sdate,
+		   A.storage_name 
+	FROM(
+	  	SELECT FILE.data_file_id,
+		       FILE.data_file_name,
+		       FILE.data_file_content,
+		       FILE.data_file_state,
+		       DATE_FORMAT(FILE.data_file_sdate, '%Y-%m-%d') AS data_file_sdate,
+		       STORAGE.storage_name
+		FROM data_file_info FILE, data_storage_info STORAGE
+		WHERE FILE.data_file_state = 'Y'
+		  AND FILE.storage_id = STORAGE.storage_id
+		  AND FILE.data_type_id = #{dataTypeId}
+		  AND FILE.data_file_name LIKE CONCAT('%',#{searchDataFileName},'%')) A LEFT JOIN
+	
+		(
+	  	SELECT DF.data_file_name, 
+		       DT.data_type_name,
+		       DF.data_file_id 
+		FROM file_service_info FS, 
+		     data_file_info DF, 
+		     data_type_info DT
+		WHERE FS.data_file_id = DF.data_file_id
+		  AND DF.data_type_id = DT.data_type_id
+		  AND FS.file_serv_state <> 'D' 
+		ORDER BY DT.data_type_name) B ON A.data_file_id = B.data_file_id JOIN (select @RNUM:=0)R
+	  WHERE B.data_file_id IS NULL
+	  ]]>
+	</select>
+
+	<!-- 데이터 파일 버전 리스트 -->
+	<select id="verInFile" parameterType="fileServiceInfoVO"
+		resultMap="dataVerInfoMap">
+	<![CDATA[
+	SELECT file_ver_id, 
+		   file_ver_name, 
+		   file_ver_rank,
+		   DATE_FORMAT(file_ver_sdate, '%Y-%m-%d') AS file_ver_sdate, 
+		   etc, 
+		   data_file_id
+	FROM file_version_info
+	WHERE data_file_id = #{dataFileId}
+	  AND file_ver_state = 'Y'
+ 	  AND file_ver_name LIKE CONCAT('%',#{searchFileVerName},'%')
+	]]>
+	</select>
+
+	<!-- 버전 상세 정보 -->
+	<select id="verDetail" parameterType="fileServiceInfoVO"
+		resultType="appMappingInfoVO">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum, 
+		   DF.file_name,
+		   DF.file_size,
+		   (CASE DF.file_state WHEN 'Y' THEN '사용' WHEN 'N' THEN '미사용' END) AS file_state, 
+		   DATE_FORMAT(DF.file_sdate, '%Y-%m-%d') AS file_sdate,
+		   DF.file_update
+	FROM data_file_list_info DF, (select @RNUM:=0)R
+	WHERE DF.file_state <> 'D'
+	  AND DF.file_ver_id = #{fileVerId}
+	]]>
+	</select>
+
+	<!-- 파일 상세 정보 -->
+	<select id="fileDetail" parameterType="fileServiceInfoVO"
+		resultMap="dataFileInfoMap">
+		SELECT data_file_name,
+		data_file_content,
+		data_file_store
+		FROM data_file_info
+		WHERE data_file_id = #{dataFileId}
+	</select>
+
+	<!-- 파일 서비스 등록 -->
+	<insert id="serviceInsert" parameterType="fileServiceInfoVO">
+		INSERT
+		INTO file_service_info (file_serv_state,
+		file_serv_sdate,
+		etc,
+		data_file_id)
+		VALUES (#{fileServState},
+		now(),
+		#{etc},
+		#{dataFileId})
+	</insert>
+
+	<!-- file_service_detail_info 등록 -->
+	<insert id="fileServiceDetailInfo" parameterType="fileServiceInfoVO">
+		INSERT
+		INTO file_service_detail_info (serv_detail_state,
+		serv_detail_sdate,
+		file_serv_id,
+		file_ver_id,
+		data_file_id)
+		VALUES ('Y',
+		now(),
+		#{fileServId},
+		#{fileVerId},
+		#{dataFileId})
+	</insert>
+
+	<!-- 파일 서비스 정보 -->
+	<select id="fileServiceInfo" parameterType="String" resultMap="fileServiceMap">
+		SELECT DT.data_type_name,
+		DF.data_file_name,
+		DF.data_file_id,
+		DF.data_file_content,
+		IF(DF.data_file_store = 'Y', '등록', '미등록') AS data_file_store,
+		FS.file_serv_id,
+		FS.file_serv_state,
+		FS.etc,
+		DATE_FORMAT(FS.file_serv_sdate, '%Y-%m-%d') AS file_serv_sdate
+		FROM file_service_info FS,
+		data_file_info DF,
+		data_type_info DT
+		WHERE FS.data_file_id = DF.data_file_id
+		AND DF.data_type_id = DT.data_type_id
+		AND FS.file_serv_id = #{fileServId}
+	</select>
+
+	<!-- 데이터 버전 정보 -->
+	<select id="versionInfo" parameterType="fileServiceInfoVO"
+		resultMap="dataVerInfoMap">
+		SELECT A.file_ver_id,
+		A.file_ver_rank,
+		A.file_ver_name,
+		A.file_ver_sdate,
+		'#FFFFFF' AS color,
+		'N' AS state
+		FROM (SELECT file_ver_id,
+		file_ver_rank,
+		file_ver_name,
+		file_ver_sdate
+		FROM file_version_info FV
+		WHERE file_ver_state = 'Y'
+		AND data_file_id = #{dataFileId}
+		AND file_ver_name LIKE CONCAT('%',#{searchFileVerName},'%')) A
+
+		LEFT JOIN
+
+		(SELECT FV.file_ver_id,
+		FV.file_ver_rank,
+		FV.file_ver_name,
+		FV.file_ver_sdate
+		FROM file_service_detail_info FSD,
+		file_service_info FS,
+		data_file_info DF,
+		file_version_info FV
+		WHERE FSD.file_serv_id = FS.file_serv_id
+		AND FSD.data_file_id = DF.data_file_id
+		AND FSD.file_ver_id = FV.file_ver_id
+		AND FSD.serv_detail_state = 'Y'
+		AND FS.file_serv_id = #{fileServId}
+		AND FV.file_ver_name LIKE CONCAT('%',#{searchFileVerName},'%')) B
+		ON A.file_ver_id = B.file_ver_id
+
+		WHERE B.file_ver_id IS NULL
+
+		UNION
+
+		SELECT FV.file_ver_id,
+		FV.file_ver_rank,
+		FV.file_ver_name,
+		FV.file_ver_sdate,
+		'E6E6FA' AS color,
+		'Y' AS state
+		FROM file_service_detail_info FSD,
+		file_service_info FS,
+		data_file_info DF,
+		file_version_info FV
+		WHERE FSD.file_serv_id = FS.file_serv_id
+		AND FSD.data_file_id = DF.data_file_id
+		AND FSD.file_ver_id = FV.file_ver_id
+		AND FSD.serv_detail_state = 'Y'
+		AND FS.file_serv_id = #{fileServId}
+		AND FV.file_ver_name LIKE CONCAT('%',#{searchFileVerName},'%')
+	</select>
+
+	<!-- 매핑 정보 수정 -->
+	<update id="serviceUpdate" parameterType="fileServiceInfoVO">
+		UPDATE file_service_info
+		SET file_serv_state = #{fileServState},
+		etc = #{etc}
+		WHERE file_serv_id = #{fileServId}
+	</update>
+
+	<!-- 기존 등록된 file_service_detail_info 삭제 -->
+	<update id="fileServiceDetailDel" parameterType="String">
+		UPDATE file_service_detail_info
+		SET serv_detail_state = 'D'
+		WHERE file_serv_id = #{fileServId}
+	</update>
+
+	<!-- 파일 서비스 삭제 -->
+	<update id="fileServiceDelete" parameterType="String">
+		UPDATE file_service_info
+		SET file_serv_state = 'D'
+		WHERE file_serv_id = #{fileServId}
+	</update>
+	<!-- Last file_serv_id -->
+	<select id="lastSeq_fileServiceInfo" parameterType="String"
+		resultType="java.lang.Integer">
+		SELECT MAX(file_serv_id) FROM file_service_info LIMIT 1;
+	</select>
+</mapper>

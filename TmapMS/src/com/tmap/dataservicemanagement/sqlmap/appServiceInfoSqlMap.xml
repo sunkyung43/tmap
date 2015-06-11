@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tmap.sqlMap.appServiceInfoSqlMap">
+
+<!-- 매핑정보 resultMap -->
+<resultMap id="appMappingInfoMap" type="appMappingInfoVO">
+    <result property="rownum"				column="ROWNUM"					javaType="java.lang.String" />
+    <result property="appMappingId"			column="app_mapping_id"			javaType="java.lang.String" />
+    <result property="appMappingName"		column="app_mapping_name"		javaType="java.lang.String" />
+    <result property="appMappingContent"	column="app_mapping_content"	javaType="java.lang.String" />
+    <result property="appMappingState"		column="app_mapping_state" 		javaType="java.lang.String" />
+    <result property="appMappingSdate"		column="app_mapping_sdate"		javaType="java.lang.String" />
+    <result property="appName"				column="app_name"				javaType="java.lang.String" />
+    <result property="appInfoSeq"			column="app_id"					javaType="java.lang.String" />
+    <result property="appServiceState"		column="app_map_service_state"		javaType="java.lang.String" />
+    <result property="appServiceType"		column="app_map_service_type"		javaType="java.lang.String" />
+    <result property="appServiceDistribute"	column="app_map_service_distribute"	javaType="java.lang.String" />
+</resultMap>
+
+<!-- 배포정보 resultMap -->
+<resultMap id="appServiceInfoMap" type="appServiceInfoVO">
+    <result property="appServiceId"			column="app_map_service_id"			javaType="java.lang.String" />
+    <result property="appServiceName"		column="app_map_service_name"		javaType="java.lang.String" />
+    <result property="appServiceSdate"		column="app_map_service_sdate"		javaType="java.lang.String" />
+    <result property="appServiceState"		column="app_map_service_state"		javaType="java.lang.String" />
+    <result property="appServiceType"		column="app_map_service_type"		javaType="java.lang.String" />
+    <result property="appServiceDistribute"	column="app_map_service_distribute"	javaType="java.lang.String" />
+    <result property="appVerId"             column="app_ver_id"                 javaType="java.lang.String" />
+    <result property="AppId"                column="app_id"                     javaType="java.lang.String" />
+</resultMap>
+
+<!-- 데이터 파일 resultMap -->
+<resultMap id="dataFileInfoMap" type="dataFileInfoVO">
+    <result property="dataFileId"		column="data_file_id"		javaType="java.lang.String" />
+    <result property="dataFileName"		column="data_file_name"		javaType="java.lang.String" />
+    <result property="dataFileContent"	column="data_file_content"	javaType="java.lang.String" />
+    <result property="dataFileState"	column="data_file_state" 	javaType="java.lang.String" />
+    <result property="dataFileSdate"	column="data_file_sdate"	javaType="java.lang.String" />
+    <result property="dataFileStore"	column="data_file_store"	javaType="java.lang.String" />
+    <result property="storageName"		column="storage_name"		javaType="java.lang.String" />
+</resultMap>
+
+
+<!-- 데이터 배포 정보 리스트 수 -->
+<select id="countAppServiceInfoList" parameterType="String" resultType="java.lang.Integer">
+	<![CDATA[
+  SELECT COUNT(*)
+	FROM
+	(SELECT mp.app_mapping_id,
+       	    mp.app_mapping_name,
+       	    mp.app_mapping_content,
+       	    se.app_map_service_state,
+            se.app_map_service_type,
+            se.app_map_service_distribute
+	 FROM app_mapping_info mp LEFT JOIN app_mapping_service_info se ON mp.app_mapping_id = se.app_mapping_id
+	 WHERE mp.app_mapping_state = 'Y'
+	   AND mp.app_mapping_name LIKE CONCAT('%',#{appMappingName},'%')
+       AND se.app_mapping_id IS NULL
+	 
+	 UNION
+	 
+	 SELECT mp.app_mapping_id,
+       	    mp.app_mapping_name,
+       	    mp.app_mapping_content,
+       	    se.app_map_service_state,
+            se.app_map_service_type,
+            se.app_map_service_distribute
+	 FROM app_mapping_info mp LEFT JOIN app_mapping_service_info se ON mp.app_mapping_id = se.app_mapping_id
+	 WHERE mp.app_mapping_state = 'Y'
+	   AND se.app_map_service_state <> 'D'
+  	   AND mp.app_mapping_name LIKE CONCAT('%',#{appMappingName},'%')
+       AND se.app_mapping_id IS NOT NULL)A, (select @RNUM:=0)R    
+    WHERE A.app_map_service_type <>'W'
+    AND A.app_map_service_type IS NOT NULL
+	ORDER BY A.app_mapping_id ASC
+	]]> 
+</select>	
+
+<!-- 데이터 배포 정보 리스트 출력 -->
+<select id="appServiceInfoList" parameterType="appServiceInfoVO" resultMap="appMappingInfoMap">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum,
+           A.app_mapping_id,
+       	   A.app_mapping_name,
+       	   A.app_mapping_content,
+       	   A.app_map_service_state,
+           A.app_map_service_type,
+           A.app_map_service_distribute
+	FROM
+	(SELECT mp.app_mapping_id,
+       	    mp.app_mapping_name,
+       	    mp.app_mapping_content,
+       	    se.app_map_service_state,
+            se.app_map_service_type,
+            se.app_map_service_distribute
+	 FROM app_mapping_info mp LEFT JOIN app_mapping_service_info se ON mp.app_mapping_id = se.app_mapping_id
+	 WHERE mp.app_mapping_state = 'Y'
+	   AND mp.app_mapping_name LIKE CONCAT('%',#{appMappingName},'%')
+       AND se.app_mapping_id IS NULL
+	 
+	 UNION
+	 
+	 SELECT mp.app_mapping_id,
+       	    mp.app_mapping_name,
+       	    mp.app_mapping_content,
+       	    se.app_map_service_state,
+            se.app_map_service_type,
+            se.app_map_service_distribute
+	 FROM app_mapping_info mp LEFT JOIN app_mapping_service_info se ON mp.app_mapping_id = se.app_mapping_id
+	 WHERE mp.app_mapping_state = 'Y'
+	   AND se.app_map_service_state <> 'D'
+  	   AND mp.app_mapping_name LIKE CONCAT('%',#{appMappingName},'%')
+       AND se.app_mapping_id IS NOT NULL)A, (select @RNUM:=0)R    
+    WHERE A.app_map_service_type <>'W'
+    AND A.app_map_service_type IS NOT NULL
+	ORDER BY A.app_mapping_id ASC
+	]]>
+</select>
+
+<select id="countAppServiceInfoListReady" parameterType="String" resultType="java.lang.Integer">
+	<![CDATA[
+ SELECT COUNT(*)
+	FROM
+	(SELECT mp.app_mapping_id,
+       	    mp.app_mapping_name,
+       	    mp.app_mapping_content,
+       	    se.app_map_service_state,
+            se.app_map_service_type,
+            se.app_map_service_distribute
+	 FROM app_mapping_info mp LEFT JOIN app_mapping_service_info se ON mp.app_mapping_id = se.app_mapping_id
+	 WHERE mp.app_mapping_state = 'Y'
+	   AND mp.app_mapping_name LIKE CONCAT('%',#{appMappingName},'%')
+       AND se.app_mapping_id IS NULL
+	 
+	 UNION
+	 
+	 SELECT mp.app_mapping_id,
+       	    mp.app_mapping_name,
+       	    mp.app_mapping_content,
+       	    se.app_map_service_state,
+            se.app_map_service_type,
+            se.app_map_service_distribute
+	 FROM app_mapping_info mp LEFT JOIN app_mapping_service_info se ON mp.app_mapping_id = se.app_mapping_id
+	 WHERE mp.app_mapping_state = 'Y'
+	   AND se.app_map_service_state <> 'D'
+  	   AND mp.app_mapping_name LIKE CONCAT('%',#{appMappingName},'%')
+       AND se.app_mapping_id IS NOT NULL)A, (select @RNUM:=0)R    
+    WHERE A.app_map_service_type <>'W'
+    AND A.app_map_service_type IS NOT NULL
+	ORDER BY A.app_mapping_id ASC
+	]]> 
+</select>	
+
+<!-- 데이터 배포 정보 리스트 출력 -->
+<select id="appServiceInfoListReady" parameterType="appServiceInfoVO" resultMap="appMappingInfoMap">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum,
+           A.app_mapping_id,
+       	   A.app_mapping_name,
+       	   A.app_mapping_content,
+       	   A.app_map_service_state,
+           A.app_map_service_type,
+           A.app_map_service_distribute
+	FROM
+	(SELECT mp.app_mapping_id,
+       	    mp.app_mapping_name,
+       	    mp.app_mapping_content,
+       	    se.app_map_service_state,
+            se.app_map_service_type,
+            se.app_map_service_distribute
+	 FROM app_mapping_info mp LEFT JOIN app_mapping_service_info se ON mp.app_mapping_id = se.app_mapping_id
+	 WHERE mp.app_mapping_state = 'Y'
+	   AND mp.app_mapping_name LIKE CONCAT('%',#{appMappingName},'%')
+       AND se.app_mapping_id IS NULL
+	 
+	 UNION
+	 
+	 SELECT mp.app_mapping_id,
+       	    mp.app_mapping_name,
+       	    mp.app_mapping_content,
+       	    se.app_map_service_state,
+            se.app_map_service_type,
+            se.app_map_service_distribute
+	 FROM app_mapping_info mp LEFT JOIN app_mapping_service_info se ON mp.app_mapping_id = se.app_mapping_id
+	 WHERE mp.app_mapping_state = 'Y'
+	   AND se.app_map_service_state <> 'D'
+  	   AND mp.app_mapping_name LIKE CONCAT('%',#{appMappingName},'%')
+       AND se.app_mapping_id IS NOT NULL)A, (select @RNUM:=0)R    
+    WHERE A.app_map_service_type LIKE CONCAT('%',#{appServiceType},'%')
+    AND A.app_map_service_type IS NOT NULL
+	ORDER BY A.app_mapping_id ASC
+	]]>
+</select>
+
+<!-- 매핑 정보 -->
+<select id="mappingDetail" parameterType="String" resultMap="appMappingInfoMap">
+	SELECT AM.app_mapping_id, 
+		   AM.app_mapping_name, 
+		   AM.app_mapping_content, 
+		   AM.app_mapping_state, 
+		   AM.app_mapping_sdate, 
+		   AI.app_name
+	FROM app_mapping_info AM, app_info AI
+	WHERE AM.app_id = AI.app_id
+	  AND AM.app_mapping_id = #{appMappingId}
+</select>
+
+<!-- 배포 정보 -->
+<select id="serviceDetail" parameterType="String" resultMap="appServiceInfoMap">
+	<![CDATA[
+	SELECT app_map_service_id,
+		   app_map_service_name,
+		   app_map_service_sdate,
+		   app_map_service_state,
+		   app_map_service_type,
+		   app_map_service_distribute
+	FROM app_mapping_service_info
+	WHERE app_mapping_id = #{appMappingId}
+	  AND app_map_service_state <> 'D' 
+	]]>
+</select>
+
+<!-- 등록된 타입별 파일 정보 -->
+<select id="typeAndFile" parameterType="String" resultType="appMappingInfoVO">
+	<![CDATA[
+	SELECT DF.data_file_name AS dataFileName, 
+	       DT.data_type_name AS dataTypeName,
+	       DF.data_file_id AS dataFileId
+	FROM app_mapping_detail_info AMD, 
+	     data_file_info DF, 
+	     data_type_info DT
+	WHERE AMD.data_file_id = DF.data_file_id
+	  AND DF.data_type_id = DT.data_type_id
+	  AND AMD.app_mapping_id = #{appMappingId}
+	  AND AMD.app_map_detail_state <> 'D'
+	ORDER BY DT.data_type_name
+	]]>
+</select>
+	
+<!-- rowSpan -->
+<select id="rowSpan" parameterType="String" resultType="java.util.Map">
+	<![CDATA[
+	SELECT COUNT(*) rowSpan, data_type_name AS dataTypeName
+	FROM(
+		SELECT DF.data_file_name, 
+			   DY.data_type_name 
+		FROM app_mapping_detail_info AMD, 
+			 data_file_info DF, 
+			 data_type_info DY
+		WHERE AMD.data_file_id = DF.data_file_id
+	  	  AND DF.data_type_id = DY.data_type_id
+	  	  AND AMD.app_mapping_id = #{appMappingId}
+	  	  AND AMD.app_map_detail_state <> 'D')A
+	GROUP BY A.data_type_name
+	]]>
+</select>
+
+<!-- 파일 상세 정보 -->
+<select id="fileDetail" parameterType="appServiceInfoVO" resultMap="dataFileInfoMap">
+	SELECT data_file_name,
+	       data_file_content,
+	       data_file_state,
+	       DATE_FORMAT(data_file_sdate, '%Y-%m-%d') AS data_file_sdate,
+	       data_file_store
+	FROM data_file_info 
+	WHERE data_file_id = #{dataFileId}
+</select>
+
+<!-- 배포 정보 등록 -->
+<insert id="appServiceInsert" parameterType="appServiceInfoVO">
+	INSERT 
+	INTO app_mapping_service_info (app_map_service_name,
+						   app_map_service_state, 
+						   app_map_service_distribute, 
+						   app_map_service_type, 
+						   app_map_service_sdate, 
+						   app_mapping_id,
+                           app_ver_id,
+                           app_id)
+	VALUES (#{appServiceName},
+			#{appServiceState}, 
+			#{appServiceDistribute}, 
+			#{appServiceType}, 
+			now(), 
+			#{appMappingId},
+            #{appVerId},
+            #{appId})						   
+</insert>
+
+<!-- app_map_service_id 검색 -->
+<select id="appServiceId" resultType="java.lang.Integer">
+     SELECT MAX(app_map_service_id) FROM app_mapping_service_info
+</select>
+
+<!-- 배포 정보 수정 -->
+<update id="appServiceUpdate" parameterType="appServiceInfoVO">
+	UPDATE app_mapping_service_info
+	SET app_map_service_name = #{appServiceName},
+		app_map_service_state = #{appServiceState},
+		app_map_service_distribute = #{appServiceDistribute}, 
+		app_map_service_type = #{appServiceType}
+	WHERE app_map_service_id = #{appServiceId}		
+</update>
+
+<!-- 매핑 ID 검색 -->
+<select id="appMappingId" parameterType="String" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT app_mapping_Id 
+	FROM app_mapping_service_info 
+	WHERE app_map_service_name = #{appServiceName} 
+	  AND app_map_service_state <> 'D'
+	]]>
+</select>
+
+<!-- 배포 정보 삭제 -->
+<update id="serviceDelete" parameterType="String">
+	UPDATE app_mapping_service_info 
+	SET app_map_service_state = 'D',
+		app_map_service_distribute = 'F',
+		app_map_service_type = 'F'
+	WHERE app_service_id = #{appServiceId}
+</update>
+
+<!-- 배포명 중복확인 -->
+<select id="checkServiceName" parameterType="String" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(app_map_service_name) 
+	FROM app_mapping_service_info 
+	WHERE app_map_service_name = #{checkServiceName}
+	  AND app_map_service_state <> 'D'
+	]]>
+</select>
+
+</mapper>

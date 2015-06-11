@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tmap.sqlMap.deviceInfoSqlMap">
+
+<!-- 단말모델등록(중복확인) -->
+<select id="checkPhmodelInfo" parameterType="com.tmap.appmanagement.vo.PhModelInfoListVO" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(*)  
+	FROM phone_model_info 
+	WHERE ph_id = #{phInfoSeq} 
+	  AND os_ver_id = #{osVerInfoSeq} 
+	  AND ph_model_state <> 'D'
+	]]>
+</select> 
+
+<!-- 단말모델등록 -->
+<insert id="newPhModelInfo" parameterType="com.tmap.appmanagement.vo.PhModelInfoListVO">
+	INSERT 
+	INTO phone_model_info (ph_id, 
+		 			 	   os_ver_id, 
+					  	   ph_model_state, 
+					       ph_model_sdate,
+					       ph_model_name)
+	VALUES (#{phInfoSeq},
+			#{osVerInfoSeq},
+			'Y',
+			CURRENT_TIMESTAMP,
+			#{phModelName})
+</insert>
+
+<!-- 히스토리 관련 시작-->
+
+<!-- 마지막 id값 -->
+<select id="lastSeq" resultType="java.lang.Integer">
+	SELECT MAX(ph_model_id) FROM phone_model_info
+</select>
+
+</mapper>

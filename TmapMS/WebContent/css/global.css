@@ -1,0 +1,91 @@
+<style type="text/css">
+<!--
+a:link,a:visited,a:active {
+	text-decoration : none;
+    FONT-FAMILY: 돋움;
+	font-size : 9pt;
+	color : #4F4F30;
+}
+
+a:hover {
+	text-decoration : underline;
+    FONT-FAMILY: 돋움;
+	color : #3C63CE;
+	font-size : 9pt;
+}
+
+BODY, TR, TD, TH {
+	font-size : 9pt;
+	color : #4F4F30;
+    FONT-FAMILY: 돋움;
+}
+
+INPUT {
+	font-size : 9pt;
+	color : #4F4F30;
+    FONT-FAMILY: 돋움;
+    Border: 1x SOLID #D0D0D0;
+}
+
+TEXTAREA {
+	font-size : 9pt;
+	color : #4F4F30;
+    FONT-FAMILY: 돋움;
+    Border: 1x SOLID #D0D0D0;
+}
+
+SELECT {
+	background : #FFFFFF;
+	font-size : 9pt;
+	color : #4F4F30;
+    FONT-FAMILY: 돋움;
+	Border: 1x SOLID #D0D0D0;
+}
+
+OPTION {
+	font-size : 9pt;
+	color : #4F4F30;
+	background : #FFFFFF;
+    FONT-FAMILY: 돋움;
+	Border: 1x SOLID #D0D0D0;
+
+}
+
+IMG
+{
+    BORDER-BOTTOM: 0px;
+    BORDER-LEFT: 0px;
+    BORDER-RIGHT: 0px;
+    BORDER-TOP: 0px
+}
+
+.notINPUT {
+	font-size : 9pt;
+	color : #4F4F30;
+    FONT-FAMILY: 돋움;
+    Border: 0x SOLID BLACK;
+}
+#font {
+	font-color : #4F4F30;
+}
+
+#frm {
+    Border: 0x SOLID BLACK;	
+}
+
+.filed {  background-image: url(/images/intro/filed_bg.gif); border-style: none; border-top-width: 0px; border-right-width: 0px; border-bottom-width: 0px; border-left-width: 0px; color: #747474; font-family: 돋움; font-size: 9pt; line-height: 16px}
+
+.submit {border:1 solid #C0C0C0;font-weight:bold;font-size:9pt;color:white;background-color:#777777;height:20px}
+.button {border:1 solid #C0C0C0;font-weight:bold;font-size:9pt;color:white;background-color:#999999;height:20px}
+
+.color1 {filter='progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr=#A5BEAD, EndColorStr=#FFFFFF)';font-size: 10pt; border:1 solid #A5BEAD;height:20px; padding-top:1px; padding-left:5px; padding-right:5px;}
+.color2 {filter='progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr=#bfdfff, EndColorStr=#FFFFFF)';font-size: 10pt; border:1 solid #0080ff;height:20px; padding-top:1px; padding-left:5px; padding-right:5px;}
+.color3 {filter='progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr=#E1A984, EndColorStr=#FFFFFF)';font-size: 10pt; border:1 solid #E1A984;height:20px; padding-top:1px; padding-left:5px; padding-right:5px;}
+.color4 {filter='progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr=#99A9CB, EndColorStr=#FFFFFF)';font-size: 10pt; border:1 solid #99A9CB;height:20px; padding-top:1px; padding-left:5px; padding-right:5px;}
+
+#memoryticker {
+	BORDER-RIGHT: black 0px solid; PADDING-RIGHT: 3px; BORDER-TOP: black 0px solid; PADDING-LEFT: 3px; FILTER: progid:DXImageTransform.Microsoft.GradientWipe(GradientSize=1.0 Duration=0.7); PADDING-BOTTOM: 3px; FONT: 12px Verdana; BORDER-LEFT: black 0px solid; WIDTH: 550px; PADDING-TOP: 3px; BORDER-BOTTOM: black 0px solid; BACKGROUND-COLOR: #F7F7F7
+}
+
+//-->
+</style>

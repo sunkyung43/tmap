@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="rsInterfaceInfoSqlMap">
+
+<resultMap id="rsInterfaceInfoMap" type="rsInterfaceInfoVO">
+    <result property="rownum"		  	 column="ROWNUM"			 javaType="java.lang.String" />
+    <result property="interfaceId"	  	 column="interface_id"	  	 javaType="java.lang.String" />
+    <result property="interfaceProtocol" column="interface_protocol" javaType="java.lang.String" />
+    <result property="interfaceName" 	 column="interface_name" 	 javaType="java.lang.String" />
+    <result property="interfaceContent"	 column="interface_content"	 javaType="java.lang.String" />
+    <result property="interfaceState"	 column="interface_state"	 javaType="java.lang.String" />
+    <result property="interfaceSdate"	 column="interface_sdate"	 javaType="java.lang.String" />
+    <result property="interfaceNum"	  	 column="interface_num"		 javaType="java.lang.String" />
+    <result property="interfaceAlign"	 column="interface_align"	 javaType="java.lang.String" />
+</resultMap>
+
+<!-- RS Interface 정보 리스트 수 -->
+<select id="countRsInterfaceInfoList" parameterType="rsInterfaceInfoVO" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(*)
+	FROM rs_interface_info
+	WHERE interface_state <> 'D'
+	  AND interface_name LIKE CONCAT('%',#{interfaceName},'%')
+	]]>
+</select>
+
+<!-- RS Interface 정보 리스트 -->
+<select id="rsInterfaceInfoList" parameterType="rsInterfaceInfoVO" resultMap="rsInterfaceInfoMap">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum, 
+		   RI.interface_id, 
+		   RI.interface_protocol, 
+		   RI.interface_name, 
+		   RI.interface_content, 
+		   RI.interface_state,
+		   DATE_FORMAT(RI.interface_sdate, '%Y-%m-%d') AS interface_sdate,
+		   RI.interface_num,
+		   RI.interface_align 
+	FROM rs_interface_info RI, (select @RNUM:=0)R
+	WHERE interface_state <> 'D'
+	  AND interface_name LIKE CONCAT('%',#{interfaceName},'%')
+	ORDER BY RI.interface_sdate DESC  
+	]]>
+</select>
+
+<!-- RS Interface Edit폼 -->
+<select id="rsInterfaceInfo" parameterType="String" resultMap="rsInterfaceInfoMap">
+	SELECT interface_id, 
+		   interface_protocol, 
+		   interface_name, 
+		   interface_content, 
+		   interface_state,
+		   interface_sdate,
+		   interface_num,
+		   interface_align 
+	FROM rs_interface_info 
+	WHERE interface_id = #{interfaceId}
+</select>
+
+<!-- 프로토콜명 중복체크 -->
+<select id="checkName" parameterType="String" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(interface_protocol)
+	FROM rs_interface_info
+	WHERE interface_protocol = #{checkName} 
+	  AND interface_state <> 'D'
+  	]]>
+</select>
+
+<!-- 프로토콜명 중복체크 -->
+<select id="interfaceNum" parameterType="String" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(interface_align)
+	FROM rs_interface_info
+	WHERE interface_align = #{interfaceAlign} 
+	  AND interface_state <> 'D'
+  	]]>
+</select>
+
+<!-- RS Interface 등록 -->
+<insert id="interfaceInsert" parameterType="rsInterfaceInfoVO">
+	INSERT
+	INTO rs_interface_info (interface_protocol,
+					   	    interface_name,
+					   		interface_content,
+					   		interface_state,
+					   		interface_sdate,
+					   		interface_num,
+					   		interface_align)
+	VALUES (#{interfaceProtocol},
+			#{interfaceName},
+			#{interfaceContent},
+			#{interfaceState},
+			now(),
+			#{interfaceNum},
+			#{interfaceAlign})
+</insert>
+
+<!-- interfaceId -->
+<select id="interfaceId" parameterType="String" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT interface_id AS interfaceId
+	FROM rs_interface_info
+	WHERE interface_protocol = #{interfaceProtocol}
+	  AND interface_state <> 'D'
+	]]> 
+</select>
+
+<!-- RS Interface 수정 -->
+<update id="interfaceUpdate" parameterType="rsInterfaceInfoVO">
+	UPDATE rs_interface_info
+	SET interface_content = #{interfaceContent},
+		interface_state = #{interfaceState}
+	WHERE interface_id = #{interfaceId}		
+</update>
+
+<!-- RS Interface 삭제 -->
+<update id="interfaceDelete" parameterType="String">
+	UPDATE rs_interface_info
+	SET interface_state = 'D'
+	WHERE interface_id = #{interfaceId}
+</update>
+
+</mapper>

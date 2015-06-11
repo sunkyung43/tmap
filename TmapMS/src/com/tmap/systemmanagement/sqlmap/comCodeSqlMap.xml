@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tmap.systemmanagement.pkgsqlmap.comCodeSqlMap">
+
+<!-- 공통코드관리 리스트 수 -->
+<select id="countComCodeInfoList" parameterType="com.tmap.systemmanagement.vo.ComCodeInfoListVO" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT count(*) 
+	FROM comcode_info 
+	WHERE code LIKE CONCAT('%',#{comCode},'%') 
+	  AND code_name LIKE CONCAT('%',#{codeName},'%')
+	  AND code_level = '1'
+	  AND code_state <> 'D'
+	]]>
+</select>
+
+<!-- 공통코드관리 리스트 출력 -->
+<select id="comCodeInfoList" parameterType="com.tmap.systemmanagement.vo.ComCodeInfoListVO" resultType="com.tmap.systemmanagement.vo.ComCodeInfoListVO">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum, 
+		   comcode.code AS comCode,
+		   comcode.code_level AS codeLevel,
+		   comcode.code_name AS codeName,
+		   comcode.code_content AS codeRemark,
+		   comcode.code_state AS useState,
+		   comcode.code_upcode AS upComCode
+	FROM comcode_info comcode, 
+		 (select @RNUM:=0)R 
+	WHERE comcode.code LIKE CONCAT('%',#{comCode},'%') 
+	  AND comcode.code_name LIKE CONCAT('%',#{codeName},'%')
+	  AND comcode.code_state <> 'D'
+	  AND comcode.code_level = '1'
+	]]>  
+</select>
+
+<!-- 공통코드관리 등록 -->
+<insert id="comCodeInfoInsert" parameterType="com.tmap.systemmanagement.vo.ComCodeInfoListVO">
+	INSERT 
+	INTO comcode_info (code, 
+				   	   code_name, 
+				       code_content, 
+				       code_state,
+				       code_upcode, 
+				       code_level) 
+	VALUES (#{comCode}, 
+		    #{codeName}, 
+		    #{codeRemark}, 
+		    #{useState},
+		    #{upComCode}, 
+		    #{codeLevel})
+</insert>
+
+<insert id="comCodeInsert" parameterType="com.tmap.systemmanagement.vo.ComCodeInfoListVO">
+	INSERT 
+	INTO com_set_info (com_set_cnt, 
+				       com_set_state, 
+				       com_set_sdate,
+				       mapdown_manage_id, 
+				       system_id,
+				       com_type_code) 
+	VALUES ('0', 
+		    #{useState}, 
+		    now(),
+		    #{mapdownManageId}, 
+		    #{systemId},
+		    #{comCode})
+</insert>
+
+<select id="comCodeCountList" parameterType="com.tmap.systemmanagement.vo.ComCodeInfoListVO" resultType="com.tmap.systemmanagement.vo.ComCodeInfoListVO">
+	SELECT  SI.SYSTEM_ID AS systemId, 
+			CSI.MAPDOWN_MANAGE_ID AS mapdownManageId 
+	FROM system_info SI, com_set_info CSI 
+	WHERE SI.SYSTEM_ID = CSI.SYSTEM_ID 
+	AND SI.SYSTEM_STATE = 'Y' AND SI.SERVER_TYPE_CODE = '1'
+	GROUP BY SI.SYSTEM_ID
+</select>
+
+<!-- 공통코드관리 상세정보 -->
+<select id="comCodeInfoDetail" parameterType="com.tmap.systemmanagement.vo.ComCodeInfoListVO" resultType="com.tmap.systemmanagement.vo.ComCodeInfoListVO">
+	SELECT code AS comCode,
+		   code_level AS codeLevel,
+		   code_name AS codeName,
+		   code_content AS codeRemark,
+		   code_state AS useState,
+		   code_upcode AS upComCode 
+	FROM comcode_info 
+	WHERE code=#{comCode}
+</select>
+
+<!-- 공통코드관리 상세정보2 -->
+<select id="comCodeDetail" parameterType="com.tmap.systemmanagement.vo.ComCodeInfoListVO" resultType="com.tmap.systemmanagement.vo.ComCodeInfoListVO">
+	<![CDATA[
+	SELECT code AS comCode,
+		   code_level AS codeLevel,
+		   code_name AS codeName,
+		   code_content AS codeRemark,
+		   code_state AS useState,
+		   code_upcode AS upComCode  
+	FROM comcode_info 
+	WHERE code_upcode=#{comCode}
+	  AND code_state<>'D'
+	  AND code_level='2'
+	]]>  	
+</select>
+
+
+<!-- 공통코드관리 수정 -->
+<update id="comCodeInfoUpdate" parameterType="com.tmap.systemmanagement.vo.ComCodeInfoListVO">
+	UPDATE comcode_info 
+	SET code_name = #{codeName}, 
+		code_content = #{codeRemark}, 
+		code_state = #{useState}
+	WHERE code=#{comCode}
+</update>
+
+<!-- 상위공통코드관리 삭제 -->
+<update id="comCodeInfoDelete" parameterType="com.tmap.systemmanagement.vo.ComCodeInfoListVO">
+	UPDATE comcode_info  
+	SET code_state = 'D' 
+	WHERE code=#{comCode}
+</update>
+
+<!-- 하위공통코드관리 삭제 -->
+<update id="comCodeInfoDelete2" parameterType="com.tmap.systemmanagement.vo.ComCodeInfoListVO">
+	UPDATE comcode_info  
+	SET code_state = 'D' 
+	WHERE code_upcode=#{comCode}
+</update>
+
+<!-- 공통코드관리 수정 -->
+<update id="comCodeInfoUseState" parameterType="com.tmap.systemmanagement.vo.ComCodeInfoListVO">
+	UPDATE comcode_info 
+	SET code_state = #{useState}, 
+		code_name = #{codeName},
+		code_content = #{codeRemark}
+	WHERE code=#{comCode}
+</update>
+
+<!-- 아이디 중복체크 -->
+<select id="countSameId" parameterType="java.lang.String" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(code) 
+	FROM comcode_info 
+	WHERE code = #{id}
+	  AND code_state <> 'D'
+	]]>
+</select>
+
+</mapper>

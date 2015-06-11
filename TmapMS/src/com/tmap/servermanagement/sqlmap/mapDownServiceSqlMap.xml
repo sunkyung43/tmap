@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapDownServiceSqlMap">
+
+<!-- 서버기기 정보 resultMap -->
+<resultMap id="systemInfoMap" type="systemInfoVO">
+    <result property="rownum"		  column="ROWNUM"			javaType="java.lang.String" />
+    <result property="systemId"	  	  column="system_id"	  	javaType="java.lang.String" />
+    <result property="systemName"	  column="system_name"		javaType="java.lang.String" />
+    <result property="systemNum" 	  column="system_num" 		javaType="java.lang.String" />
+    <result property="systemState"	  column="system_state"		javaType="java.lang.String" />
+    <result property="systemSdate"	  column="system_sdate"		javaType="java.lang.String" />
+    <result property="systemIpOut"	  column="system_ip_out"	javaType="java.lang.String" />
+    <result property="systemPortOut"  column="system_port_out"	javaType="java.lang.String" />
+    <result property="systemIpIn" 	  column="system_ip_in" 	javaType="java.lang.String" />
+    <result property="systemPortIn"	  column="system_port_in"	javaType="java.lang.String" />
+    <result property="systemCpuCount" column="system_cpu_count"	javaType="java.lang.String" />
+    <result property="systemMemory"	  column="system_memory"	javaType="java.lang.String" />
+    <result property="etc"	  		  column="etc"				javaType="java.lang.String" />
+    <result property="serverTypeId"   column="server_type_id" 	javaType="java.lang.String" />
+    <result property="serverTypeName" column="server_type_name" javaType="java.lang.String" />
+	<result property="serverTypeCode" column="server_type_code" javaType="java.lang.String" />
+</resultMap>
+
+<!-- 서버기기 정보 -->
+<select id="systemInfo" resultMap="systemInfoMap">
+	<![CDATA[
+	SELECT SI.system_id, 
+	       SI.system_name, 
+	       SI.system_ip_out,
+           SI.system_port_out,
+           SI.system_ip_in,
+           SI.system_port_in,
+	       SI.system_state,
+	       CI.code_name AS serverTypeName
+	FROM system_info SI, comcode_info CI
+	WHERE SI.server_type_code = CI.code
+	  AND CI.code_upcode = "SYSTEM"
+	  AND CI.code_name = 'DS'
+	  AND SI.system_state <> 'D'
+	ORDER BY system_state DESC, system_name ASC	]]>
+</select>
+
+<!-- 상세 접속 정보(서버기기 정보) -->
+<select id="systemDetailInfo" parameterType="String" resultMap="systemInfoMap">
+	<![CDATA[
+	SELECT system_id, 
+	       system_name, 
+	       system_ip_out
+	FROM system_info
+	WHERE system_state <> 'D'
+	  AND system_id = #{systemId} LIMIT 1
+	]]>
+</select>
+
+<!-- 상세 접속 정보(통신방식 정보) -->
+<select id="comSetInfo" parameterType="String" resultType="systemInfoVO">
+	<![CDATA[
+		SELECT CS.com_set_id AS comSetId,
+		   CS.com_set_cnt AS comSetCnt,
+			CI.code_name AS comTypeName,
+			CI.code AS comTypeCode
+	FROM  com_set_info CS, comcode_info CI
+	WHERE CI.code = CS.com_type_code
+	  AND CS.com_set_state = 'Y'
+	  AND CI.code_upcode = "ComType"
+	  AND system_id = #{systemId}
+	]]>
+</select>
+
+<!-- 상세 접속 정보(서비스 운영 정보) -->
+<select id="mapManageInfo" parameterType="String" resultType="systemInfoVO">
+	<![CDATA[
+	SELECT mapdown_manage_id AS mapdownManageId,
+		   session_max_idletime AS sessionMaxIdletime,
+       	   session_max_bandwidth AS sessionMaxBandwidth,
+       	   total_max_bandwidth AS totalMaxBandwidth
+	FROM mapdown_manage_info
+	WHERE system_id = #{systemId}
+	]]>
+</select>
+
+<!-- 통신방식 정보 수정 -->
+<update id="comSetUpdate" parameterType="systemInfoVO">
+	UPDATE com_set_info
+	SET com_set_cnt = #{comSetCnt}
+	WHERE system_id = #{systemId}
+	  AND com_type_id = #{comTypeId} 
+</update>
+
+<!-- 서비스 운영 정보 수정 -->
+<update id="mapManageUpdate" parameterType="systemInfoVO">
+	UPDATE mapdown_manage_info
+	SET session_max_bandwidth = #{sessionMaxBandwidth}, 
+		session_max_idletime = #{sessionMaxIdletime}, 
+		total_max_bandwidth = #{totalMaxBandwidth} 
+	WHERE system_id = #{systemId} 
+</update>
+
+
+</mapper>

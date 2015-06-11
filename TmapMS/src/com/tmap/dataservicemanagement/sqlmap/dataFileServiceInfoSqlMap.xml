@@ -1,0 +1,780 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.tmap.sqlMap.dataFileServiceInfoSqlMap">
+	<!-- App서비스관리 리스트 출력 resultMap -->
+	<resultMap id="forceDataServiceListMap" type="com.tmap.dataservicemanagement.vo.ForceReservationVO">
+		<result property="rownum" column="ROWNUM" javaType="java.lang.String" />
+		<result property="upgradePhModelId" column="upgrade_ph_model_id" javaType="java.lang.String" />
+		<result property="upgradeType" column="upgrade_type" javaType="java.lang.String" />
+		<result property="upgradeKey" column="upgrade_key" javaType="java.lang.String" />
+		<result property="phModelId" column="ph_model_id" javaType="java.lang.String" />
+		<result property="upgradeModelState" column="upgrade_model_state" javaType="java.lang.String" />
+		<result property="upgradeModelSdate" column="upgrade_model_sdate" javaType="java.lang.String" />
+		<result property="upgradeDataId" column="upgrade_data_id" javaType="java.lang.String" />
+		<result property="upAppId" column="up_app_id" javaType="java.lang.String" />
+		<result property="upAppName" column="up_app_name" javaType="java.lang.String" />
+		<result property="upAppVerId" column="up_app_ver_id" javaType="java.lang.String" />
+		<result property="upAppVerName" column="up_app_ver_name" javaType="java.lang.String" />
+		<result property="upDataFileServId" column="up_data_file_serv_id" javaType="java.lang.String" />
+		<result property="upDataFileServName" column="up_data_file_serv_name" javaType="java.lang.String" />
+		<result property="upgradeDivision" column="upgrade_division" javaType="java.lang.String" />
+		<result property="comment" column="comment" javaType="java.lang.String" />
+		<result property="etc" column="etc" javaType="java.lang.String" />
+		<result property="checkYn" column="check_yn" javaType="java.lang.String" />
+		<result property="phName" column="ph_name" javaType="java.lang.String" />
+		<result property="osVerName" column="os_ver_name" javaType="java.lang.String" />
+		<result property="upgradeDataState" column="upgrade_data_state" javaType="java.lang.String" />
+	</resultMap>
+
+	<!-- 데이터 파일 서비스 resultMap -->
+	<resultMap id="dataFileServiceInfoMap" type="dataFileServiceInfoVO">
+		<result property="rownum" column="rownum" javaType="java.lang.String" />
+		<result property="dataFileServiceId" column="data_file_service_id" javaType="java.lang.String" />
+		<result property="fileServiceState" column="file_service_state" javaType="java.lang.String" />
+		<result property="fileServiceDistribute" column="file_service_distribute" javaType="java.lang.String" />
+		<result property="fileServiceType" column="file_service_type" javaType="java.lang.String" />
+		<result property="fileServiceSdate" column="file_service_sdate" javaType="java.lang.String" />
+		<result property="fileServiceName" column="file_service_name" javaType="java.lang.String" />
+		<result property="fileServId" column="file_serv_id" javaType="java.lang.String" />
+		<result property="dataTypeId" column="data_type_id" javaType="java.lang.String" />
+		<result property="dataFileId" column="data_file_id" javaType="java.lang.String" />
+		<result property="dataTypeName" column="data_type_name" javaType="java.lang.String" />
+		<result property="dataFileName" column="data_file_name" javaType="java.lang.String" />
+		<result property="url" column="url" javaType="java.lang.String" />
+	</resultMap>
+
+	<!-- 데이터 타입 resultMap -->
+	<resultMap id="dataTypeInfoMap" type="dataTypeInfoVO">
+		<result property="rowSpan" column="rowSpan" javaType="java.lang.String" />
+		<result property="dataTypeId" column="data_type_id" javaType="java.lang.String" />
+		<result property="dataTypeName" column="data_type_name"
+			javaType="java.lang.String" />
+		<result property="dataTypeContent" column="data_type_content"
+			javaType="java.lang.String" />
+	</resultMap>
+
+	<!-- 데이터 파일 버전 resultMap -->
+	<resultMap id="dataVerInfoMap" type="fileVersionInfoVO">
+		<result property="fileVerId" column="file_ver_id" javaType="java.lang.String" />
+		<result property="fileVerName" column="file_ver_name" javaType="java.lang.String" />
+		<result property="fileVerRank" column="file_ver_rank" javaType="java.lang.String" />
+		<result property="fileVerState" column="file_ver_state"
+			javaType="java.lang.String" />
+		<result property="fileVerSdate" column="file_ver_sdate"
+			javaType="java.lang.String" />
+		<result property="etc" column="etc" javaType="java.lang.String" />
+	</resultMap>
+
+	<!-- 파일서비스 배포 리스트 수 -->
+	<select id="countAllDataFileServiceList" parameterType="String"
+		resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(*)
+	FROM
+	(SELECT A.data_file_name,
+		    A.data_file_id,
+		    A.file_serv_id,
+	        A.file_serv_sdate,
+		    A.data_type_name,
+	        B.file_service_state, 
+	        B.file_service_distribute, 
+	        B.file_service_type
+	FROM(SELECT DF.data_file_name,
+		 	    DF.data_file_id,
+		    	FS.file_serv_id,
+	       		FS.file_serv_sdate,  
+	     		DT.data_type_name
+		 FROM data_file_info DF, 
+			  file_service_info FS, 
+			  data_type_info DT
+		 WHERE DF.data_file_id = FS.data_file_id
+	  	   AND DF.data_type_id = DT.data_type_id
+	  	   AND FS.file_serv_state = 'Y'
+	  	   AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%')) A 
+		LEFT JOIN
+	 	(SELECT DFS.file_service_state, 
+	       		DFS.file_service_distribute, 
+	       		DFS.file_service_type, 
+	       		DT.data_type_name, 
+	       		DF.data_file_name,
+	       		FS.file_serv_id
+		 FROM data_file_service_info DFS, 
+	     	  file_service_info FS, 
+	     	  data_file_info DF, 
+	     	  data_type_info DT
+		 WHERE DFS.file_serv_id = FS.file_serv_id
+	  	   AND FS.data_file_id = DF.data_file_id
+	  	   AND DF.data_type_id = DT.data_type_id
+	  	   AND FS.file_serv_state = 'Y'
+	  	   AND DFS.file_service_state <> 'D'
+	  	   AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%'))B 
+	  	ON A.file_serv_id = B.file_serv_id
+	WHERE B.file_serv_id IS NULL
+	
+	UNION
+	
+	SELECT A.data_file_name,
+		   A.data_file_id,
+		   A.file_serv_id,
+	       A.file_serv_sdate,  
+		   A.data_type_name,
+	       B.file_service_state, 
+	       B.file_service_distribute, 
+	       B.file_service_type
+	FROM(SELECT DF.data_file_name,
+			    DF.data_file_id,
+		     	FS.file_serv_id,
+	       		FS.file_serv_sdate,
+		     	DT.data_type_name
+		 FROM data_file_info DF, 
+		 	  file_service_info FS, 
+			  data_type_info DT
+		 WHERE DF.data_file_id = FS.data_file_id
+	  	   AND DF.data_type_id = DT.data_type_id
+	  	   AND FS.file_serv_state = 'Y'
+	  	   AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%')) A 
+		LEFT JOIN
+	 	(SELECT DFS.file_service_state, 
+	       		DFS.file_service_distribute, 
+	       		DFS.file_service_type, 
+	       		DT.data_type_name, 
+	       		DF.data_file_name,
+	       		FS.file_serv_id
+		 FROM data_file_service_info DFS, 
+	     	  file_service_info FS, 
+	     	  data_file_info DF, 
+	     	  data_type_info DT
+		 WHERE DFS.file_serv_id = FS.file_serv_id
+	  	   AND FS.data_file_id = DF.data_file_id
+	  	   AND DF.data_type_id = DT.data_type_id
+	  	   AND FS.file_serv_state = 'Y'
+	  	   AND DFS.file_service_state <> 'D'
+	  	   AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%'))B 
+		ON A.file_serv_id = B.file_serv_id
+	WHERE B.file_serv_id IS NOT NULL)C
+	]]>
+	</select>
+
+	<select id="countDataFileServiceList" parameterType="dataFileServiceInfoVO"
+		resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(*)
+	FROM
+	(SELECT A.data_file_name,
+		    A.data_file_id,
+		    A.file_serv_id,
+	        A.file_serv_sdate,
+		    A.data_type_name,
+	        B.file_service_state, 
+	        B.file_service_distribute, 
+	        B.file_service_type
+	FROM(SELECT DF.data_file_name,
+		 	    DF.data_file_id,
+		    	FS.file_serv_id,
+	       		FS.file_serv_sdate,  
+	     		DT.data_type_name
+		 FROM data_file_info DF, 
+			  file_service_info FS, 
+			  data_type_info DT
+		 WHERE DF.data_file_id = FS.data_file_id
+	  	   AND DF.data_type_id = DT.data_type_id
+	  	   AND FS.file_serv_state = 'Y'
+	  	   AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%')
+	  	   AND DT.data_type_id = #{dataTypeId}) A 
+		LEFT JOIN
+	 	(SELECT DFS.file_service_state, 
+	       		DFS.file_service_distribute, 
+	       		DFS.file_service_type, 
+	       		DT.data_type_name, 
+	       		DF.data_file_name,
+	       		FS.file_serv_id
+		 FROM data_file_service_info DFS, 
+	     	  file_service_info FS, 
+	     	  data_file_info DF, 
+	     	  data_type_info DT
+		 WHERE DFS.file_serv_id = FS.file_serv_id
+	  	   AND FS.data_file_id = DF.data_file_id
+	  	   AND DF.data_type_id = DT.data_type_id
+	  	   AND FS.file_serv_state = 'Y'
+	  	   AND DFS.file_service_state <> 'D'
+	  	   AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%')
+	  	   AND DT.data_type_id = #{dataTypeId})B 
+	  	ON A.file_serv_id = B.file_serv_id
+	WHERE B.file_serv_id IS NULL
+	
+	UNION
+	
+	SELECT A.data_file_name,
+		   A.data_file_id,
+		   A.file_serv_id,
+	       A.file_serv_sdate,  
+		   A.data_type_name,
+	       B.file_service_state, 
+	       B.file_service_distribute, 
+	       B.file_service_type
+	FROM(SELECT DF.data_file_name,
+			    DF.data_file_id,
+		     	FS.file_serv_id,
+	       		FS.file_serv_sdate,
+		     	DT.data_type_name
+		 FROM data_file_info DF, 
+		 	  file_service_info FS, 
+			  data_type_info DT
+		 WHERE DF.data_file_id = FS.data_file_id
+	  	   AND DF.data_type_id = DT.data_type_id
+	  	   AND FS.file_serv_state = 'Y'
+	  	   AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%')
+	  	   AND DT.data_type_id = #{dataTypeId}) A 
+		LEFT JOIN
+	 	(SELECT DFS.file_service_state, 
+	       		DFS.file_service_distribute, 
+	       		DFS.file_service_type, 
+	       		DT.data_type_name, 
+	       		DF.data_file_name,
+	       		FS.file_serv_id
+		 FROM data_file_service_info DFS, 
+	     	  file_service_info FS, 
+	     	  data_file_info DF, 
+	     	  data_type_info DT
+		 WHERE DFS.file_serv_id = FS.file_serv_id
+	  	   AND FS.data_file_id = DF.data_file_id
+	  	   AND DF.data_type_id = DT.data_type_id
+	  	   AND FS.file_serv_state = 'Y'
+	  	   AND DFS.file_service_state <> 'D'
+	  	   AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%')
+	  	   AND DT.data_type_id = #{dataTypeId})B 
+		ON A.file_serv_id = B.file_serv_id
+	WHERE B.file_serv_id IS NOT NULL)C
+	]]>
+	</select>
+
+	<!-- 파일서비스 배포 리스트 -->
+	<select id="allDataFileServiceList" parameterType="dataFileServiceInfoVO"
+		resultMap="dataFileServiceInfoMap">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum,
+	       C.data_file_name,
+		   C.data_file_id,
+		   C.file_serv_id,
+		   C.data_type_name,
+	       C.file_service_state, 
+	       C.file_service_distribute, 
+	       C.file_service_type,
+	       C.file_service_name
+	FROM
+	(SELECT A.data_file_name,
+		    A.data_file_id,
+		    A.file_serv_id,
+	        A.file_serv_sdate,
+		    A.data_type_name,
+	        B.file_service_state, 
+	        B.file_service_distribute, 
+	        B.file_service_type,
+	        B.file_service_name
+	FROM(SELECT DF.data_file_name,
+		 	    DF.data_file_id,
+		    	FS.file_serv_id,
+	       		FS.file_serv_sdate,  
+	     		DT.data_type_name
+		 FROM data_file_info DF, 
+			  file_service_info FS, 
+			  data_type_info DT
+		 WHERE DF.data_file_id = FS.data_file_id
+	  	   AND DF.data_type_id = DT.data_type_id
+	  	   AND FS.file_serv_state = 'Y'
+	  	   AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%')) A 
+		LEFT JOIN
+	 	(SELECT DFS.file_service_state, 
+	       		DFS.file_service_distribute, 
+	       		DFS.file_service_type,
+	       		DFS.file_service_name, 
+	       		DT.data_type_name, 
+	       		DF.data_file_name,
+	       		FS.file_serv_id
+		 FROM data_file_service_info DFS, 
+	     	  file_service_info FS, 
+	     	  data_file_info DF, 
+	     	  data_type_info DT
+		 WHERE DFS.file_serv_id = FS.file_serv_id
+	  	   AND FS.data_file_id = DF.data_file_id
+	  	   AND DF.data_type_id = DT.data_type_id
+	  	   AND FS.file_serv_state = 'Y'
+	  	   AND DFS.file_service_state <> 'D'
+	  	   AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%'))B 
+	  	ON A.file_serv_id = B.file_serv_id
+	WHERE B.file_serv_id IS NULL
+	
+	UNION
+	
+	SELECT A.data_file_name,
+		   A.data_file_id,
+		   A.file_serv_id,
+	       A.file_serv_sdate,  
+		   A.data_type_name,
+	       B.file_service_state, 
+	       B.file_service_distribute, 
+	       B.file_service_type,
+	       B.file_service_name
+	FROM(SELECT DF.data_file_name,
+			    DF.data_file_id,
+		     	FS.file_serv_id,
+	       		FS.file_serv_sdate,
+		     	DT.data_type_name
+		 FROM data_file_info DF, 
+		 	  file_service_info FS, 
+			  data_type_info DT
+		 WHERE DF.data_file_id = FS.data_file_id
+	  	   AND DF.data_type_id = DT.data_type_id
+	  	   AND FS.file_serv_state = 'Y'
+	  	   AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%')) A 
+		LEFT JOIN
+	 	(SELECT DFS.file_service_state, 
+	       		DFS.file_service_distribute, 
+	       		DFS.file_service_type,
+	       		DFS.file_service_name, 
+	       		DT.data_type_name, 
+	       		DF.data_file_name,
+	       		FS.file_serv_id
+		 FROM data_file_service_info DFS, 
+	     	  file_service_info FS, 
+	     	  data_file_info DF, 
+	     	  data_type_info DT
+		 WHERE DFS.file_serv_id = FS.file_serv_id
+	  	   AND FS.data_file_id = DF.data_file_id
+	  	   AND DF.data_type_id = DT.data_type_id
+	  	   AND FS.file_serv_state = 'Y'
+	  	   AND DFS.file_service_state <> 'D'
+	  	   AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%'))B 
+		ON A.file_serv_id = B.file_serv_id
+	WHERE B.file_serv_id IS NOT NULL)C, (SELECT @RNUM:=0)R
+	ORDER BY C.file_serv_sdate DESC
+	]]>
+	</select>
+
+	<select id="dataFileServiceList" parameterType="dataFileServiceInfoVO"
+		resultMap="dataFileServiceInfoMap">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum,
+	       C.data_file_name,
+		   C.data_file_id,
+		   C.file_serv_id,
+		   C.data_type_name,
+	       C.file_service_state, 
+	       C.file_service_distribute, 
+	       C.file_service_type,
+	       C.file_service_name
+	FROM
+	(SELECT A.data_file_name,
+		    A.data_file_id,
+		    A.file_serv_id,
+	        A.file_serv_sdate,
+		    A.data_type_name,
+	        B.file_service_state, 
+	        B.file_service_distribute, 
+	        B.file_service_type,
+	        B.file_service_name
+	FROM(SELECT DF.data_file_name,
+		 	    DF.data_file_id,
+		    	FS.file_serv_id,
+	       		FS.file_serv_sdate,  
+	     		DT.data_type_name
+		 FROM data_file_info DF, 
+			  file_service_info FS, 
+			  data_type_info DT
+		 WHERE DF.data_file_id = FS.data_file_id
+	  	   AND DF.data_type_id = DT.data_type_id
+	  	   AND FS.file_serv_state = 'Y'
+	  	   AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%')
+	  	   AND DT.data_type_id = #{dataTypeId}) A 
+		LEFT JOIN
+	 	(SELECT DFS.file_service_state, 
+	       		DFS.file_service_distribute, 
+	       		DFS.file_service_type,
+	       		DFS.file_service_name, 
+	       		DT.data_type_name, 
+	       		DF.data_file_name,
+	       		FS.file_serv_id
+		 FROM data_file_service_info DFS, 
+	     	  file_service_info FS, 
+	     	  data_file_info DF, 
+	     	  data_type_info DT
+		 WHERE DFS.file_serv_id = FS.file_serv_id
+	  	   AND FS.data_file_id = DF.data_file_id
+	  	   AND DF.data_type_id = DT.data_type_id
+	  	   AND FS.file_serv_state = 'Y'
+	  	   AND DFS.file_service_state <> 'D'
+	  	   AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%')
+	  	   AND DT.data_type_id = #{dataTypeId})B 
+	  	ON A.file_serv_id = B.file_serv_id
+	WHERE B.file_serv_id IS NULL
+	
+	UNION
+	
+	SELECT A.data_file_name,
+		   A.data_file_id,
+		   A.file_serv_id,
+	       A.file_serv_sdate,  
+		   A.data_type_name,
+	       B.file_service_state, 
+	       B.file_service_distribute, 
+	       B.file_service_type,
+	       B.file_service_name
+	FROM(SELECT DF.data_file_name,
+			    DF.data_file_id,
+		     	FS.file_serv_id,
+	       		FS.file_serv_sdate,
+		     	DT.data_type_name
+		 FROM data_file_info DF, 
+		 	  file_service_info FS, 
+			  data_type_info DT
+		 WHERE DF.data_file_id = FS.data_file_id
+	  	   AND DF.data_type_id = DT.data_type_id
+	  	   AND FS.file_serv_state = 'Y'
+	  	   AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%')
+	  	   AND DT.data_type_id = #{dataTypeId}) A 
+		LEFT JOIN
+	 	(SELECT DFS.file_service_state, 
+	       		DFS.file_service_distribute, 
+	       		DFS.file_service_type,
+	       		DFS.file_service_name, 
+	       		DT.data_type_name, 
+	       		DF.data_file_name,
+	       		FS.file_serv_id
+		 FROM data_file_service_info DFS, 
+	     	  file_service_info FS, 
+	     	  data_file_info DF, 
+	     	  data_type_info DT
+		 WHERE DFS.file_serv_id = FS.file_serv_id
+	  	   AND FS.data_file_id = DF.data_file_id
+	  	   AND DF.data_type_id = DT.data_type_id
+	  	   AND FS.file_serv_state = 'Y'
+	  	   AND DFS.file_service_state <> 'D'
+	  	   AND DF.data_file_name LIKE CONCAT('%',#{dataFileName},'%')
+	  	   AND DT.data_type_id = #{dataTypeId})B 
+		ON A.file_serv_id = B.file_serv_id
+	WHERE B.file_serv_id IS NOT NULL)C, (SELECT @RNUM:=0)R
+	ORDER BY C.file_serv_sdate DESC
+	]]>
+	</select>
+
+	<!-- 데이터 타입 리스트 -->
+	<select id="typeList" resultMap="dataTypeInfoMap">
+		SELECT data_type_id,
+		data_type_name,
+		data_type_content
+		FROM data_type_info
+		WHERE data_type_state = 'Y'
+		ORDER BY data_type_id ASC
+	</select>
+
+	<!-- 파일 서비스 정보 -->
+	<select id="dataFileServiceInfo" parameterType="String"
+		resultType="fileServiceInfoVO">
+		SELECT DT.data_type_name AS dataTypeName,
+		DF.data_file_name AS dataFileName,
+		DF.data_file_id AS dataFileId,
+		FS.file_serv_id AS fileServId,
+		FS.etc,
+		DATE_FORMAT(FS.file_serv_sdate, '%Y-%m-%d') AS fileServSdate
+		FROM file_service_info FS,
+		data_file_info DF,
+		data_type_info DT
+		WHERE FS.data_file_id = DF.data_file_id
+		AND DF.data_type_id = DT.data_type_id
+		AND FS.file_serv_id = #{fileServId}
+	</select>
+
+	<!-- 배포 정보 -->
+	<select id="serviceDetail" parameterType="String"
+		resultMap="dataFileServiceInfoMap">
+	<![CDATA[
+	SELECT data_file_service_id,
+		   file_service_state,
+		   file_service_distribute,
+		   file_service_type,
+		   file_service_sdate,
+		   file_service_name
+	FROM data_file_service_info
+	WHERE file_serv_id = #{fileServId}
+	  AND file_service_state <> 'D' 
+	]]>
+	</select>
+
+	<!-- 데이터 버전 정보 -->
+	<select id="versionInfo" parameterType="dataFileServiceInfoVO"
+		resultMap="dataVerInfoMap">
+		SELECT A.file_ver_id,
+		A.file_ver_rank,
+		A.file_ver_name,
+		A.file_ver_sdate,
+		'#FFFFFF' AS color,
+		'N' AS state
+		FROM (SELECT file_ver_id,
+		file_ver_rank,
+		file_ver_name,
+		file_ver_sdate
+		FROM file_version_info FV
+		WHERE file_ver_state = 'Y'
+		AND data_file_id = #{dataFileId}) A
+
+		LEFT JOIN
+
+		(SELECT FV.file_ver_id,
+		FV.file_ver_rank,
+		FV.file_ver_name,
+		FV.file_ver_sdate
+		FROM file_service_detail_info FSD,
+		file_service_info FS,
+		data_file_info DF,
+		file_version_info FV
+		WHERE FSD.file_serv_id = FS.file_serv_id
+		AND FSD.data_file_id = DF.data_file_id
+		AND FSD.file_ver_id = FV.file_ver_id
+		AND FSD.serv_detail_state = 'Y'
+		AND FS.file_serv_id = #{fileServId}) B
+
+		ON A.file_ver_id = B.file_ver_id
+
+		WHERE B.file_ver_id IS NULL
+
+		UNION
+
+		SELECT FV.file_ver_id,
+		FV.file_ver_rank,
+		FV.file_ver_name,
+		FV.file_ver_sdate,
+		'E6E6FA' AS color,
+		'Y' AS state
+		FROM file_service_detail_info FSD,
+		file_service_info FS,
+		data_file_info DF,
+		file_version_info FV
+		WHERE FSD.file_serv_id = FS.file_serv_id
+		AND FSD.data_file_id = DF.data_file_id
+		AND FSD.file_ver_id = FV.file_ver_id
+		AND FSD.serv_detail_state = 'Y'
+		AND FS.file_serv_id = #{fileServId}
+	</select>
+
+	<!-- 버전 상세 정보 -->
+	<select id="verDetail" parameterType="dataFileServiceInfoVO" resultType="appMappingInfoVO">
+	<![CDATA[
+	SELECT @RNUM := @RNUM + 1 AS rownum, 
+		   DF.file_name,
+		   DF.file_size,
+		   (CASE DF.file_state WHEN 'Y' THEN '사용' WHEN 'N' THEN '미사용' END) AS file_state, 
+		   DATE_FORMAT(DF.file_sdate, '%Y-%m-%d') AS file_sdate,
+		   DF.file_update,
+		   (SELECT CONCAT(SERVER_URL,DF.file_name) FROM DOWNLOAD_SERVER_INFO WHERE SERVER_TYPE ='C') AS URL
+	FROM data_file_list_info DF, (select @RNUM:=0)R
+	WHERE DF.file_state <> 'D'
+	  AND DF.file_ver_id = #{fileVerId}
+	]]>
+	</select>
+
+	<!-- 배포 정보 등록 -->
+	<insert id="dataFileServiceInsert" parameterType="dataFileServiceInfoVO">
+		INSERT
+		INTO data_file_service_info (file_service_state,
+		file_service_distribute,
+		file_service_type,
+		file_service_sdate,
+		file_service_name,
+		file_serv_id)
+		VALUES (#{fileServiceState},
+		#{fileServiceDistribute},
+		#{fileServiceType},
+		now(),
+		#{fileServiceName},
+		#{fileServId})
+	</insert>
+
+	<!-- 배포 정보 수정 -->
+	<update id="dataFileServiceUpdate" parameterType="dataFileServiceInfoVO">
+		UPDATE data_file_service_info
+		SET file_service_state = #{fileServiceState},
+		file_service_distribute = #{fileServiceDistribute},
+		file_service_type = #{fileServiceType}
+		WHERE data_file_service_id = #{dataFileServiceId}
+	</update>
+
+	<!-- 배포 정보 삭제 -->
+	<update id="dataFileServiceDelete" parameterType="String">
+		UPDATE data_file_service_info
+		SET file_service_state = 'D',
+		file_service_distribute = 'F',
+		file_service_type = 'F'
+		WHERE data_file_service_id = #{dataFileServiceId}
+	</update>
+
+	<!-- 배포명 중복확인 -->
+	<select id="checkServiceName" parameterType="String" resultType="java.lang.Integer">
+	<![CDATA[
+	SELECT COUNT(file_service_name) 
+	FROM data_file_service_info 
+	WHERE file_service_name = #{checkServiceName}
+	  AND file_service_state <> 'D'
+	]]>
+	</select>
+
+	<select id="lastSeq" parameterType="String" resultType="java.lang.Integer">
+		SELECT MAX(data_file_service_id) FROM data_file_service_info WHERE
+		file_serv_id = #{fileServId}
+	</select>
+	
+	<select id="forceReservationList" parameterType="forceReservationVO" resultMap="forceDataServiceListMap">
+		SELECT 
+		@RNUM := @RNUM + 1 AS rownum,
+		UDI.upgrade_data_state, 
+		UDI.upgrade_data_id, 
+		UDI.up_app_id, 
+		UDI.up_app_name, 
+		UDI.up_app_ver_id, 
+		UDI.up_app_ver_name, 
+		UDI.up_data_file_serv_id, 
+		UDI.up_data_file_serv_name, 
+		UDI.upgrade_type as upgrade_division, 
+		UDI.comment, 
+		UDI.etc
+		FROM upgrade_ph_model_info UPM, upgrade_data_info UDI, (select @RNUM:=0)R
+		GROUP BY UDI.upgrade_data_id
+	</select>
+	
+	<select id="targetAppList" resultType="forceReservationVO">
+		SELECT 
+		app_id AS upAppId,
+		app_name AS upAppName
+		FROM app_info
+		WHERE app_state = 'Y'
+	</select>
+	
+	<select id="targetVersionList" parameterType="String" resultType="forceReservationVO">
+		SELECT 
+		app_ver_id AS upAppVerId,
+		app_ver_name AS upAppVerName
+		FROM app_version_info
+		WHERE app_ver_state = 'Y'
+		AND app_id = #{selectTargetAppId}
+	</select>
+	
+	<select id="targetDataFileServiceList" parameterType="forceReservationVO" resultType="forceReservationVO">
+	SELECT 
+	a.data_file_service_id AS upDataFileServId,
+	a.file_service_name AS upDataFileServName 
+	FROM(SELECT * FROM data_file_service_info WHERE file_service_state = 'Y' AND file_service_type = 'R')a
+	LEFT JOIN (SELECT * FROM data_file_service_info WHERE data_file_service_id 
+	IN (SELECT up_data_file_serv_id AS data_file_service_id FROM upgrade_data_info WHERE up_app_id = #{selectTargetAppId} AND up_app_ver_id = #{selectTargetAppVerId})
+	AND file_service_state = 'Y' AND file_service_type = 'R')b
+	ON a.data_file_service_id = b.data_file_service_id
+	WHERE b.data_file_service_id is null;
+	
+	</select>
+
+
+<!-- 배포 정보 등록 -->
+	<insert id="upgradeDataInfoInsert" parameterType="forceReservationVO">
+		INSERT
+		INTO upgrade_data_info 
+		(up_app_id,
+		up_app_name,
+		up_app_ver_id,
+		up_app_ver_name,
+		up_data_file_serv_id,
+		up_data_file_serv_name,
+		upgrade_type,
+		comment,
+		etc,
+		upgrade_data_state)
+		VALUES (#{selectTargetAppId},
+		#{upAppName},
+		#{selectTargetAppVerId},
+		#{upAppVerName},
+		#{upDataFileServId},
+		#{upDataFileServName},
+		#{upgradeDivision},
+		#{comment},
+		#{etc},
+		#{upgradeDataState})
+	</insert>
+	<!-- 배포 정보 등록 -->
+	<insert id="upgradePhModelInfoInsert" parameterType="forceReservationVO">
+		INSERT
+		INTO upgrade_ph_model_info
+		(upgrade_type,
+		upgrade_key,
+		ph_model_id,
+		upgrade_model_sdate)
+		VALUES (#{upgradeType},
+		#{upgradeDataId},
+		#{phModelId},
+		now())
+	</insert>
+	<!-- 마지막  upgrade_data_id 조회-->
+	<select id="lastUpgradeDataId" resultType="java.lang.String">
+	SELECT upgrade_data_id FROM upgrade_data_info
+	ORDER BY upgrade_data_id DESC LIMIT 1
+	</select>
+	
+	<select id="dataforceReservationDetail" parameterType="forceReservationVO" resultMap="forceDataServiceListMap">
+	SELECT 
+	upgrade_data_id, 
+	up_app_id, up_app_name, 
+	up_app_ver_id, 
+	up_app_ver_name, 
+	up_data_file_serv_id, 
+	up_data_file_serv_name, 
+	upgrade_type AS upgrade_division, 
+	comment, 
+	etc,
+	upgrade_data_state
+	FROM upgrade_data_info
+	WHERE upgrade_data_id = #{upgradeDataId}
+	</select>	
+	
+	<select id="phList" parameterType="forceReservationVO" resultMap="forceDataServiceListMap">
+	SELECT upgrade_ph_model_id, upgrade_key, ph_model_id, 'Y' AS check_yn  FROM upgrade_ph_model_info WHERE upgrade_key = #{upgradeDataId} AND upgrade_type = 'D';
+	</select>
+	
+	<select id="verInPhList" parameterType="forceReservationVO" resultMap="forceDataServiceListMap">
+		SELECT P.ph_id,
+		P.ph_name,
+		M.ph_model_id,
+		M.ph_model_name,
+		V.os_ver_name,
+		'N' AS check_yn
+		FROM app_version_model_info O,
+		app_version_info A,
+		phone_model_info M,
+		os_ver_info V,
+		phone_info P
+		WHERE A.app_ver_id = O.app_ver_id
+		AND O.ph_model_id = M.ph_model_id
+		AND M.os_ver_id = V.os_ver_id
+		AND M.ph_id = P.ph_id
+		AND A.app_ver_id = #{upAppVerId}
+		AND A.app_ver_state = 'Y'
+		ORDER BY ph_model_id ASC
+	</select>
+	<update id="dataForceReservationUpdate" parameterType="forceReservationVO">
+		UPDATE upgrade_data_info
+		SET upgrade_type = #{upgradeDivision},
+		comment = #{comment},
+		etc = #{etc},
+		upgrade_data_state = #{upgradeDataState}
+		WHERE upgrade_data_id = #{upgradeDataId}
+	</update>
+	
+	<delete id="upgradePhModelInfoDelete" parameterType="forceReservationVO">
+		DELETE FROM upgrade_ph_model_info
+		WHERE upgrade_type = 'D' 
+		AND upgrade_key = #{upgradeDataId}
+	</delete>
+	
+	<delete id="dataForceReservationDelete" parameterType="forceReservationVO">
+		DELETE FROM upgrade_data_info
+		WHERE upgrade_data_id = #{upgradeDataId}
+	</delete>
+	
+	
+</mapper>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "HTTP://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	 <settings>
+		  <setting name="cacheEnabled" value="false" />
+		  <setting name="useGeneratedKeys" value="true" />
+		  <setting name="defaultExecutorType" value="REUSE" />
+	 </settings>
+	 
+	 <typeAliases>
+	 	<typeAlias type="com.tmap.login.vo.UserInfoVO" alias="userInfoVO"/>
+	 	<typeAlias type="com.tmap.login.vo.MenuInfoVO" alias="menuInfoVO"/>
+	 	
+	 	<typeAlias type="com.tmap.datafilemanagement.vo.DataFileInfoVO" alias="dataFileInfoVO"/>
+	 	<typeAlias type="com.tmap.datafilemanagement.vo.DataFileListInfoVO" alias="dataFileListInfoVO"/>
+	 	<typeAlias type="com.tmap.datafilemanagement.vo.DataStorageInfoVO" alias="dataStorageInfoVO"/>
+	 	<typeAlias type="com.tmap.datafilemanagement.vo.DataTypeInfoVO" alias="dataTypeInfoVO"/>
+	 	<typeAlias type="com.tmap.datafilemanagement.vo.FileVersionInfoVO" alias="fileVersionInfoVO"/>
+	 	
+	 	<typeAlias type="com.tmap.dataservicemanagement.vo.AppMappingInfoVO" alias="appMappingInfoVO"/>
+	 	<typeAlias type="com.tmap.dataservicemanagement.vo.AppServiceInfoVO" alias="appServiceInfoVO"/>
+	 	<typeAlias type="com.tmap.dataservicemanagement.vo.FileServiceInfoVO" alias="fileServiceInfoVO"/>
+	 	<typeAlias type="com.tmap.dataservicemanagement.vo.DataFileServiceInfoVO" alias="dataFileServiceInfoVO"/>
+	 	<typeAlias type="com.tmap.dataservicemanagement.vo.ForceReservationVO" alias="forceReservationVO"/>
+	 	
+	 	<typeAlias type="com.tmap.servermanagement.vo.ServerTypeInfoVO" alias="serverTypeInfoVO"/>
+	 	<typeAlias type="com.tmap.servermanagement.vo.ComTypeInfoVO" alias="comTypeInfoVO"/>
+	 	<typeAlias type="com.tmap.servermanagement.vo.SystemInfoVO" alias="systemInfoVO"/>
+	 	<typeAlias type="com.tmap.servermanagement.vo.SettingAllInfoVO" alias="settingAllInfoVO"/>
+	 	<typeAlias type="com.tmap.servermanagement.vo.RsInterfaceInfoVO" alias="rsInterfaceInfoVO"/>
+	 	<typeAlias type="com.tmap.servermanagement.vo.DownloadInfoVO" alias="downloadInfoVO"/>
+	 	
+	 	<typeAlias type="com.tmap.sitemanagement.vo.AuthorityInfoListVO" alias="authorityInfoListVO"/>
+		<typeAlias type="com.tmap.sitemanagement.vo.HistoryInfoListVO" alias="historyInfoListVO"/>
+		<typeAlias type="com.tmap.sitemanagement.vo.MenuInfoListVO" alias="menuInfoListVO"/>
+		
+		<typeAlias type="com.tmap.appmanagement.vo.AppInfoListVO" alias="appInfoListVO"/>
+		<typeAlias type="com.tmap.appmanagement.vo.PhInfoListVO" alias="phInfoListVO"/>
+		
+		<typeAlias type="com.tmap.systemmanagement.vo.MessageInfoListVO" alias="messageInfoListVO"/>
+		
+		<typeAlias type="com.tmap.cdnmanagement.vo.CdnInfoListVO" alias="CdnInfoListVO"/>
+	 </typeAliases>
+	 
+	 <mappers>
+	 	<mapper resource="com/tmap/login/sqlmap/loginSqlMap.xml" />
+	 	<mapper resource="com/tmap/login/sqlmap/menuSqlMap.xml" />
+
+	 	<mapper resource="com/tmap/appmanagement/sqlmap/phInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/appmanagement/sqlmap/osVerInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/appmanagement/sqlmap/phModelInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/appmanagement/sqlmap/deviceInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/appmanagement/sqlmap/appInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/appmanagement/sqlmap/appServiceSqlMap.xml" />
+	 	<mapper resource="com/tmap/appmanagement/sqlmap/templetModelInfoSqlMap.xml" />
+	 	
+	 	<mapper resource="com/tmap/sitemanagement/sqlmap/menuSqlMap.xml" />
+	 	<mapper resource="com/tmap/sitemanagement/sqlmap/authoritySqlMap.xml" />
+	 	<mapper resource="com/tmap/sitemanagement/sqlmap/historySqlMap.xml" />
+	 	
+	 	<mapper resource="com/tmap/systemmanagement/sqlmap/messageSqlMap.xml" />
+	 	<mapper resource="com/tmap/systemmanagement/sqlmap/comCodeSqlMap.xml" />
+	 	<mapper resource="com/tmap/systemmanagement/sqlmap/testPhoneSqlMap.xml" />
+	 	<mapper resource="com/tmap/systemmanagement/sqlmap/rmVersionSqlMap.xml" />
+	 	<mapper resource="com/tmap/systemmanagement/sqlmap/certTimeSqlMap.xml" />
+	 	
+	 	<mapper resource="com/tmap/servermanagement/sqlmap/serverTypeInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/servermanagement/sqlmap/comTypeInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/servermanagement/sqlmap/systemInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/servermanagement/sqlmap/mapDownServiceSqlMap.xml" />
+	 	<mapper resource="com/tmap/servermanagement/sqlmap/settingAllInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/servermanagement/sqlmap/releaseServerInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/servermanagement/sqlmap/rsInterfaceInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/servermanagement/sqlmap/downloadInfoSqlMap.xml" />
+	 	
+	 	<mapper resource="com/tmap/dataservicemanagement/sqlmap/appMappingInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/dataservicemanagement/sqlmap/appServiceInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/dataservicemanagement/sqlmap/fileServiceInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/dataservicemanagement/sqlmap/fileServiceInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/dataservicemanagement/sqlmap/dataFileServiceInfoSqlMap.xml" />
+	 	
+	 	<mapper resource="com/tmap/datafilemanagement/sqlmap/dataFileInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/datafilemanagement/sqlmap/dataFileListInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/datafilemanagement/sqlmap/dataStorageInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/datafilemanagement/sqlmap/dataTypeInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/datafilemanagement/sqlmap/fileVersionInfoSqlMap.xml" />
+	 	
+	 	<mapper resource="com/tmap/cdnmanagement/sqlmap/cdnInfoSqlMap.xml" />
+	 	<mapper resource="com/tmap/appmanagement/sqlmap/appInfoSqlMap.xml" />
+	 	
+	 </mappers>
+	 
+</configuration>

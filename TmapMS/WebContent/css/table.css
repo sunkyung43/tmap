@@ -1,0 +1,100 @@
+@CHARSET "UTF-8";
+
+
+/*  table tr td {
+    background: #fff;
+    padding: 6px;
+    text-align: center;
+    vertical-align: top;
+    border-bottom:1px solid #ddd;
+} */
+
+.aaa {
+    background: #fff;
+    padding: 6px;
+    text-align: center;
+    vertical-align: top;
+    border-bottom:1px solid #ddd;
+}
+
+
+
+/* #bbs{width:400px; height:200px;}
+#bbs h2{width:400px; height:20px; float:left;}
+#bbs li{width:400px; height:15px; float:left;} */
+/* 
+      table {
+        width: 500px;
+        border-collapse: collapse;
+        text-align: center;
+        font-family: 'Trebuchet MS';
+      }
+      td, th {
+        font-size: 10pt;
+        border: 1px solid #98bf21;
+        height: 30px;
+      }
+      th {
+        background-color: #A7C942;
+        color: #ffffff;
+        font-family: Georgia;
+      }
+      tr.alt td {
+        color: #000000;
+        background-color: #EAF2D3;
+      }  */
+/* 
+	Cusco Sky table styles
+	written by Braulio Soncco http://www.buayacorp.com
+*/
+
+/* table, th, td {
+	border: 1px solid #D4E0EE;
+	border-collapse: collapse;
+	font-family: "Trebuchet MS", Arial, sans-serif;
+	color: #555;
+}
+
+caption {
+	font-size: 150%;
+	font-weight: bold;
+	margin: 5px;
+}
+
+td, th {
+	padding: 4px;
+}
+
+thead th {
+	text-align: center;
+	background: #E6EDF5;
+	color: #4F76A3;
+	font-size: 100% !important;
+}
+
+tbody th {
+	font-weight: bold;
+}
+
+tbody tr { background: #FCFDFE; }
+
+tbody tr.odd { background: #F7F9FC; }
+
+table a:link {
+	color: #718ABE;
+	text-decoration: none;
+}
+
+table a:visited {
+	color: #718ABE;
+	text-decoration: none;
+}
+
+table a:hover {
+	color: #718ABE;
+	text-decoration: underline !important;
+}
+
+tfoot th, tfoot td {
+	font-size: 85%;
+} */
